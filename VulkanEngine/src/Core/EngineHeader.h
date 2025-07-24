@@ -18,7 +18,7 @@
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 
-#define SOURCE_DIR std::string(STR(CHIKU_SRC_PATH))
+#define SOURCE_DIR std::string(CHIKU_SRC_PATH)
 #define ASSET_REGISTRY SOURCE_DIR + std::string(STR(AssetRegistry.json)) 
 
 #define ENABLE_VALIDATION_LAYERS

@@ -1,10 +1,10 @@
-#include "OpenXR.h"
+#include "Application.h"
 
 int main()
 {
 	ZoneScoped;    // Profile this block
 
-	CHIKU::OpenXR Application;
+	CHIKU::Application Application;
 
 	Application.Init();
 	Application.Render();

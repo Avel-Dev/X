@@ -2,8 +2,6 @@
 #include "Renderer/Renderer.h"
 #include "Renderer/Window.h"
 #include "Assets/ModelAsset.h"
-#include <openxr/openxr.h>
-#include <openxr/openxr_platform.h>
 
 namespace CHIKU
 {

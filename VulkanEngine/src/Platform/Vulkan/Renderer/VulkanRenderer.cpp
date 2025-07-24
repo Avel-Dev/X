@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <cstring>
+#include "OpenXR.h"
 
 namespace CHIKU
 {

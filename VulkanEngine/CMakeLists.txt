@@ -14,6 +14,7 @@ add_subdirectory("vendor/glm")
 add_subdirectory("vendor/tracy")
 add_subdirectory("vendor/yaml-cpp")
 add_subdirectory("vendor/tinygltf")
+add_subdirectory("vendor/openxr/OpenXR-SDK-Source")
 #add_subdirectory("vendor/tinygltf/tinygltf/examples/build-gltf")
 
 include_directories("src/")
@@ -27,6 +28,7 @@ include_directories("vendor/json_nlohmann/include")
 include_directories("vendor/spirv_reflect")
 include_directories("vendor/tracy/public")
 include_directories("vendor/yaml-cpp/include")
+include_directories("vendor/OpenXR-SDK-Source/include")
  
 include_directories($ENV{VULKAN_SDK}/include)
 link_directories($ENV{VULKAN_SDK}/lib)
@@ -38,7 +40,21 @@ file(GLOB_RECURSE SRC_SOURCES "src/**/*.cpp" "src/*.cpp")
 add_executable(VulkanEngine
     ${SRC_SOURCES}
     "vendor/spirv_reflect/spirv_reflect.cpp"
-    "main.cpp")
+    "src/Core/main.cpp")
+
+if(NOT "${XR_RUNTIME_JSON}" STREQUAL "")
+    set_target_properties(
+        ${PROJECT_NAME} PROPERTIES VS_DEBUGGER_ENVIRONMENT
+                                   "XR_RUNTIME_JSON=${XR_RUNTIME_JSON}"
+    )
+endif()
+
+target_include_directories(
+    ${PROJECT_NAME}
+    PRIVATE
+        "${openxr_SOURCE_DIR}/src/common"
+        "${openxr_SOURCE_DIR}/external/include"
+)
 
 message("Source :" ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_definitions(VulkanEngine PRIVATE CHIKU_SRC_PATH=${CMAKE_CURRENT_SOURCE_DIR}/)
@@ -65,6 +81,7 @@ PUBLIC
     ${VULKAN_LIB}
     yaml-cpp
     tinygltf
+    openxr_loader           
 )
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)

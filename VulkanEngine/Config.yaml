@@ -1,0 +1,3 @@
+StartScene:
+  Name: "Default"
+  Path: "DefaultScene.json"

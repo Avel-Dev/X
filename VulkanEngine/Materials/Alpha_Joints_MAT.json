@@ -1,0 +1,21 @@
+{
+    "Config": {
+        "blendEnabled": false,
+        "cullMode": "VK_CULL_MODE_BACK_BIT",
+        "depthTest": true,
+        "depthWrite": true,
+        "frontFace": "VK_FRONT_FACE_COUNTER_CLOCKWISE",
+        "polygonMode": "VK_POLYGON_MODE_FILL",
+        "topology": "VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST"
+    },
+    "baseColorFactor": [
+        0.15355153381824493,
+        0.21289387345314026,
+        0.2222171425819397,
+        1.0
+    ],
+    "metallicFactor": 0.5,
+    "name": "Alpha_Joints_MAT",
+    "roughnessFactor": 0.5527864098548889,
+    "shader": "Defaultlit"
+}

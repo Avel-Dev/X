@@ -1,0 +1,33 @@
+{
+	"Name": "Default Scene",
+	"Entities": [
+		{
+			"Name": "Camera",
+			"Type": "Camera",
+			"Transform": {
+				"Position": [ 0.0, 0.0, 5.0 ],
+				"Rotation": [ 0.0, 0.0, 0.0 ],
+				"Scale": [ 1.0, 1.0, 1.0 ]
+			},
+			"CameraSettings": {
+				"FOV": 45.0,
+				"AspectRatio": 16.0,
+				"NearPlane": 0.1,
+				"FarPlane": 100.0
+			}
+		},
+		{
+			"Name": "Light",
+			"Type": "Light",
+			"Transform": {
+				"Position": [ 10.0, 10.0, 10.0 ],
+				"Rotation": [ 45.0, 45.0, 45.0 ],
+				"Scale": [ 1.0, 1.0, 1.0 ]
+			},
+			"LightSettings": {
+				"Color": [ 1.0, 1.0, 1.0 ],
+				"Intensity": 1.5
+			}
+		}
+	]
+}}

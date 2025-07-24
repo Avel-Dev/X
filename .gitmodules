@@ -1,0 +1,24 @@
+[submodule "VulkanEngine/vendor/glm"]
+	path = VulkanEngine/vendor/glm
+	url = https://github.com/g-truc/glm.git
+[submodule "VulkanEngine/vendor/tracy"]
+	path = VulkanEngine/vendor/tracy
+	url = https://github.com/wolfpld/tracy.git
+[submodule "VulkanEngine/vendor/yaml-cpp"]
+	path = VulkanEngine/vendor/yaml-cpp
+	url = https://github.com/jbeder/yaml-cpp.git
+[submodule "VulkanEngine/vendor/tinygltf/tinygltf"]
+	path = VulkanEngine/vendor/tinygltf/tinygltf
+	url = https://github.com/syoyo/tinygltf.git
+[submodule "VulkanEngine/vendor/spirv_reflect"]
+	path = VulkanEngine/vendor/spirv_reflect
+	url = https://github.com/KhronosGroup/SPIRV-Reflect.git
+[submodule "VulkanEngine/vendor/json_nlohmann"]
+	path = VulkanEngine/vendor/json_nlohmann
+	url = https://github.com/nlohmann/json.git
+[submodule "VulkanEngine/vendor/tinygltf"]
+	path = VulkanEngine/vendor/tinygltf
+	url = https://github.com/syoyo/tinygltf.git
+[submodule "VulkanEngine/vendor/glfw"]
+	path = VulkanEngine/vendor/glfw
+	url = https://github.com/glfw/glfw.git

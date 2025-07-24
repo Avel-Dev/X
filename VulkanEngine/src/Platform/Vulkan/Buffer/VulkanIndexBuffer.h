@@ -1,5 +1,4 @@
 #pragma once
-#include "Vulkan/VulkanHeader.h"
 #include "Renderer/Buffer/IndexBuffer.h"
 
 namespace CHIKU

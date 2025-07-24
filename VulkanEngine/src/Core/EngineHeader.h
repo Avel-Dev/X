@@ -1,5 +1,23 @@
 #pragma once
 
+
+#ifdef PLT_WINDOWS
+#define VK_USE_PLATFORM_WIN32_KHR
+#define GLFW_EXPOSE_NATIVE_WIN32 
+#define NOMINMAX  // Add this before glfw3native.h to suppress min/max macros
+#elif PLT_UNIX
+#define GLFW_EXPOSE_NATIVE_WAYLAND
+#endif
+
+#define RENDERER_VULKAN
+
+#ifdef RENDERER_VULKAN
+#define GLFW_INCLUDE_VULKAN
+#endif // 
+
+#include <GLFW/glfw3.h>
+#include <GLFW/glfw3native.h>
+
 #define SOURCE_DIR std::string(STR(CHIKU_SRC_PATH))
 #define ASSET_REGISTRY SOURCE_DIR + std::string(STR(AssetRegistry.json)) 
 
@@ -15,8 +33,6 @@
 
 #define STR2(x) #x
 #define STR(x) STR2(x)
-
-#define RENDERER_VULKAN
 
 #define GLM_FORCE_DEPTH_ZERO_TO_ONE
 #define GLM_ENABLE_EXPERIMENTAL

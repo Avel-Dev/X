@@ -9,14 +9,12 @@
 
 namespace CHIKU
 {
-	VulkanRenderer* VulkanRenderer::s_Instance;
 	uint32_t VulkanRenderer::m_CurrentFrame;
 
 	VulkanRenderer::VulkanRenderer()
 	{
 		ZoneScoped;
 		m_Window = nullptr;
-		s_Instance = this;
 		
 		m_Instance = VK_NULL_HANDLE;
 		m_Surface = VK_NULL_HANDLE;
@@ -30,7 +28,7 @@ namespace CHIKU
 		m_PresentQueue = VK_NULL_HANDLE;
 	}
 
-	void VulkanRenderer::Init(GLFWwindow* window)
+	void VulkanRenderer::mInit(GLFWwindow* window)
 	{
 		ZoneScoped;
 
@@ -51,7 +49,7 @@ namespace CHIKU
 		m_Swapchain.Init(m_Window, m_PhysicalDevice, m_LogicalDevice, m_Surface);
 	}
 
-	void VulkanRenderer::CleanUp()
+	void VulkanRenderer::mCleanUp()
 	{
 		ZoneScoped;
 
@@ -78,7 +76,7 @@ namespace CHIKU
 		vkDestroyInstance(m_Instance, nullptr);
 	}
 
-	void VulkanRenderer::Wait()
+	void VulkanRenderer::mWait()
 	{
 		ZoneScoped;
 
@@ -86,7 +84,7 @@ namespace CHIKU
 		vkQueueWaitIdle(m_PresentQueue);
 	}
 
-	void VulkanRenderer::PrivateBeginFrame()
+	void VulkanRenderer::mBeginFrame()
 	{
 		ZoneScoped;
 
@@ -109,7 +107,7 @@ namespace CHIKU
 		BeginRecordingCommands(commandBuffer);
 	}
 
-	void VulkanRenderer::PrivateEndFrame()
+	void VulkanRenderer::mEndFrame()
 	{
 		ZoneScoped;
 

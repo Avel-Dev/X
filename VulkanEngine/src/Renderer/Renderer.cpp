@@ -5,9 +5,11 @@
 
 namespace CHIKU
 {
-	std::shared_ptr<Renderer> Renderer::Create()
+	std::unique_ptr<Renderer> Renderer::s_Instance = Renderer::Create();
+
+	std::unique_ptr<Renderer> Renderer::Create()
 	{
 		ZoneScoped;
-		return std::make_shared<VulkanRenderer>();
+		return std::make_unique<VulkanRenderer>();
 	}
 }

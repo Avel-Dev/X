@@ -9,23 +9,41 @@ namespace CHIKU
 		Renderer() = default;
 		virtual ~Renderer() = default;
 
-		virtual void Init(GLFWwindow* window) = 0;
-		virtual void CleanUp() = 0;
-		virtual void Wait() = 0;
+		static void Init(GLFWwindow* window) { s_Instance->mInit(window); }
+		static void CleanUp() { s_Instance->mCleanUp(); }
+		static void Wait() { s_Instance->mWait(); }
 
-		virtual void BeginFrame() = 0;
-		virtual void EndFrame() = 0;
+		static void BeginFrame() { s_Instance->mBeginFrame(); }
+		static void EndFrame() { s_Instance->mEndFrame(); }
 
-		virtual void* GetRenderPass() = 0;
-		virtual void* GetCommandBuffer() = 0;
-		virtual void* GetDevice() = 0;
-		virtual void* GetPhysicalDevice() = 0;
+		static void* GetRenderPass() { return s_Instance->mGetRenderPass(); }
+		static void* GetCommandBuffer() { return s_Instance->mGetCommandBuffer(); }
+		static void* GetDevice() { return s_Instance->mGetDevice(); }
+		static void* GetPhysicalDevice() { return s_Instance->mGetPhysicalDevice(); }
 
-		virtual void* BeginSingleTimeCommands() = 0;
-		virtual void EndSingleTimeCommands(void* cmdBuffer) = 0;
+		static void* BeginSingleTimeCommands() { return s_Instance->mBeginSingleTimeCommands(); }
+		static void EndSingleTimeCommands(void* cmdBuffer) { return s_Instance->mEndSingleTimeCommands(cmdBuffer); }
 
-		static std::shared_ptr<Renderer> Create();
+		static std::unique_ptr<Renderer> Create();
+
 	protected:
+		virtual void mInit(GLFWwindow* window) = 0;
+		virtual void mCleanUp() = 0;
+		virtual void mWait() = 0;
+
+		virtual void mBeginFrame() = 0;
+		virtual void mEndFrame() = 0;
+
+		virtual void* mGetRenderPass() = 0;
+		virtual void* mGetCommandBuffer() = 0;
+		virtual void* mGetDevice() = 0;
+		virtual void* mGetPhysicalDevice() = 0;
+
+		virtual void* mBeginSingleTimeCommands() = 0;
+		virtual void mEndSingleTimeCommands(void* cmdBuffer) = 0;
+
+	protected:
+		static std::unique_ptr<Renderer> s_Instance;
 		GLFWwindow* m_Window = nullptr;
 	};
 }

@@ -1,7 +1,6 @@
 #include "Renderer/Renderer.h"
 #include "Vulkan/Renderer/Swapchain.h"
 #include "Vulkan/Renderer/Commands.h"
-#include "Vulkan/VulkanHeader.h"
 
 namespace CHIKU
 {
@@ -10,33 +9,30 @@ namespace CHIKU
 	public:
 		VulkanRenderer();
 
-		void Init(GLFWwindow* window) override;
-		void CleanUp() override;
-		void Wait() override;
+		void mInit(GLFWwindow* window) override;
+		void mCleanUp() override;
+		void mWait() override;
 
 		static VkDevice GetVulkanDevice() { return (VkDevice)s_Instance->GetDevice(); }
 		static VkPhysicalDevice GetVulkanPhysicalDevice() { return (VkPhysicalDevice)s_Instance->GetPhysicalDevice(); }
 		static VkCommandBuffer GetVulkanCommandBuffer() { return (VkCommandBuffer)s_Instance->GetCommandBuffer(); }
 		static VkRenderPass GetVulkanRenderPass() { return (VkRenderPass)s_Instance->GetRenderPass(); }
 
-		virtual void BeginFrame() override { s_Instance->PrivateBeginFrame(); }
-		virtual void EndFrame() override { s_Instance->PrivateEndFrame(); }
-
-		virtual void* GetRenderPass() override { return s_Instance->m_Swapchain.GetRenderPass(); }
-		virtual void* GetCommandBuffer() override { return s_Instance->m_Commands.GetCommandBuffer(s_Instance->m_CurrentFrame); }
-		virtual void* GetDevice() override { return s_Instance->m_LogicalDevice; }
-		virtual void* GetPhysicalDevice() override { return s_Instance->m_PhysicalDevice; }
+		virtual void* mGetRenderPass() override { return m_Swapchain.GetRenderPass(); }
+		virtual void* mGetCommandBuffer() override { return m_Commands.GetCommandBuffer(m_CurrentFrame); }
+		virtual void* mGetDevice() override { return m_LogicalDevice; }
+		virtual void* mGetPhysicalDevice() override { return m_PhysicalDevice; }
 		
-		virtual void* BeginSingleTimeCommands() override { return m_Commands.BeginSingleTimeCommands(); }
-		virtual void EndSingleTimeCommands(void* commandBuffer) override { m_Commands.EndSingleTimeCommands((VkCommandBuffer)commandBuffer); }
+		virtual void* mBeginSingleTimeCommands() override { return m_Commands.BeginSingleTimeCommands(); }
+		virtual void mEndSingleTimeCommands(void* commandBuffer) override { m_Commands.EndSingleTimeCommands((VkCommandBuffer)commandBuffer); }
 
-		static const inline uint32_t GetCurrentFrame() noexcept { return s_Instance->m_CurrentFrame; }
+		static const inline uint32_t GetCurrentFrame() noexcept { return m_CurrentFrame; }
 		static const inline VkCommandBuffer BeginRecordingSingleTimeCommands() noexcept { return (VkCommandBuffer)s_Instance->BeginSingleTimeCommands(); }
 		static const inline void EndRecordingSingleTimeCommands(VkCommandBuffer commandBuffer) noexcept { return s_Instance->EndSingleTimeCommands(commandBuffer); }
 
 	private:
-		void PrivateBeginFrame();
-		void PrivateEndFrame();
+		void mBeginFrame();
+		void mEndFrame();
 
 		void BeginRecordingCommands(const VkCommandBuffer& commandBuffer);
 		void EndRecordingCommands(const VkCommandBuffer& commandBuffer);
@@ -68,7 +64,6 @@ namespace CHIKU
 		void CreateSyncObjects();
 
 	private:
-		static VulkanRenderer* s_Instance;
 		static uint32_t m_CurrentFrame;
 
 		std::vector<VkSemaphore> m_ImageAvailableSemaphore;

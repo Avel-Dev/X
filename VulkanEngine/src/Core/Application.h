@@ -16,7 +16,6 @@ namespace CHIKU
 
 	private:
 		Window m_Window;
-		std::shared_ptr<Renderer> m_Renderer;
 		std::shared_ptr<ModelAsset> m_Model;
 	};
 }

@@ -49,11 +49,6 @@ namespace CHIKU
 		}
 		m_Pipelines.clear();
 
-		for (auto& layout : m_GlobalDescriptorSetLayouts)
-		{
-			vkDestroyDescriptorSetLayout(VulkanRenderer::GetVulkanDevice(), layout, nullptr);
-		}
-
 		for (auto& setStorage : m_GlobalUniformSetStorage)
 		{
 			for (auto& [bindingIndex, storage] : setStorage.BindingStorage)

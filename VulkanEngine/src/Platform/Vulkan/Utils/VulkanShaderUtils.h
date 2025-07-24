@@ -1,6 +1,5 @@
 #pragma once
 #include "Assets/Asset.h"
-#include "Vulkan/VulkanHeader.h"
 #include "Vulkan/Buffer/VulkanUniformBuffer.h"
 #include "Vulkan/Buffer/VulkanVertexBuffer.h"
 #include <spirv_reflect.h>

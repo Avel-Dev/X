@@ -12,8 +12,7 @@ namespace CHIKU
 		ZoneScoped;    // Profile this block
 
 		m_Window.Init();
-		m_Renderer = Renderer::Create();
-		m_Renderer->Init(m_Window.GetWindow());
+		Renderer::Init(m_Window.GetWindow());
 		AssetManager::Init();
 		DescriptorPool::Init();
 		GraphicsPipeline::s_Instance->Init();
@@ -45,9 +44,9 @@ namespace CHIKU
 		{
 			FrameMark;
 			m_Window.WindowPoolEvent();
-			m_Renderer->BeginFrame();
+			Renderer::BeginFrame();
 			m_Model->Draw();
-			m_Renderer->EndFrame();
+			Renderer::EndFrame();
 		}
 	}
 
@@ -55,10 +54,10 @@ namespace CHIKU
 	{
 		ZoneScoped;
 
-		m_Renderer->Wait();
+		Renderer::Wait();
 		DescriptorPool::CleanUp();
 		AssetManager::CleanUp();
 		GraphicsPipeline::s_Instance->CleanUp();
-		m_Renderer->CleanUp();
+		Renderer::CleanUp();
 	}
 }

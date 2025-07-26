@@ -1,5 +1,9 @@
 project(OpenXR)
 
+# Set options before adding the OpenXR-SDK-Source
+set(BUILD_API_LAYERS ON CACHE BOOL "" FORCE)
+set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
+
 add_subdirectory("vendor/openxr/OpenXR-SDK-Source")
 file(GLOB_RECURSE GAME_SOURCES "src/*.cpp")
 

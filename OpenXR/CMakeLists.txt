@@ -3,6 +3,7 @@ project(OpenXR)
 add_subdirectory("vendor/openxr/OpenXR-SDK-Source")
 file(GLOB_RECURSE GAME_SOURCES "src/*.cpp")
 
+include_directories("src")
 include_directories("vendor/OpenXR-SDK-Source/include")
 
 add_executable(OpenXR ${GAME_SOURCES})

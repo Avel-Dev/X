@@ -4,19 +4,10 @@
 
 namespace CHIKU
 {
+	struct QueueFamilyIndices;
+	
 	namespace Utils
 	{
-		struct QueueFamilyIndices
-		{
-			std::optional<uint32_t> GraphicsFamily;
-			std::optional<uint32_t> PresentFamily;
-
-			bool isComplete()
-			{
-				return GraphicsFamily.has_value() && PresentFamily.has_value();
-			}
-		};
-
 		struct SwapChainSupportDetails
 		{
 			VkSurfaceCapabilitiesKHR Capabilities;
@@ -25,7 +16,7 @@ namespace CHIKU
 		};
 
 		uint32_t FindMemoryType(VkPhysicalDevice physicalDevice,uint32_t typeFilter, VkMemoryPropertyFlags properties);
-		QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR surface);
+		CHIKU::QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR surface);
 
 		int RateDeviceSuitability(VkPhysicalDevice device);
 		bool CheckDeviceExtensionSupport(VkPhysicalDevice device, const std::vector<const char*>& deviceExtensions);

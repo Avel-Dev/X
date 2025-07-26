@@ -270,4 +270,13 @@ namespace OpenXR
 		}
 	}
 
-} // namespace CHIKU
+} // namespace Utils
+
+namespace CHIKU
+{
+	// Factory function to create an instance of the OpenXR application.
+	CHIKU::Application* CreateApplication()
+	{
+		return new OpenXR::OpenXR();
+	}
+}

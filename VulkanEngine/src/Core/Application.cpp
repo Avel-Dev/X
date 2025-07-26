@@ -32,23 +32,36 @@ namespace CHIKU
 		while (!m_Window.WindowShouldClose())
 		{
 			FrameMark;
+			RunLoopBody();
 		}
+	}
+
+	void Application::RunLoopBody()
+	{
+		ZoneScoped;
+		m_Window.WindowPoolEvent();
 	}
 
 	//Renderer Thread Process
 	void Application::Render()
 	{
 		ZoneScoped;
-
 		while (!m_Window.WindowShouldClose())
 		{
 			FrameMark;
-			m_Window.WindowPoolEvent();
-			Renderer::BeginFrame();
-			m_Model->Draw();
-			Renderer::EndFrame();
+			RenderLoopBody();
 		}
 	}
+
+	void Application::RenderLoopBody()
+	{
+		ZoneScoped;
+		m_Window.WindowPoolEvent();
+		Renderer::BeginFrame();
+		m_Model->Draw();
+		Renderer::EndFrame();
+	}
+
 
 	void Application::CleanUp()
 	{

@@ -51,12 +51,3 @@ namespace OpenXR
 		std::vector<std::string> m_instanceExtensions = { XR_EXT_DEBUG_UTILS_EXTENSION_NAME, XR_KHR_VULKAN_ENABLE2_EXTENSION_NAME };
 	};
 }
-
-namespace CHIKU
-{
-	// Factory function to create an instance of the OpenXR application.
-	CHIKU::Application* CreateApplication()
-	{
-		return new OpenXR::OpenXR();
-	}
-}

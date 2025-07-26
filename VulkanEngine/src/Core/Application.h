@@ -15,6 +15,9 @@ namespace CHIKU
 		virtual void Render();
 		virtual void CleanUp();
 
+		virtual void RunLoopBody();
+		virtual void RenderLoopBody();
+
 	protected:
 		Window m_Window;
 
@@ -22,4 +25,6 @@ namespace CHIKU
 		bool m_sessionRunning = false;
 		std::shared_ptr<ModelAsset> m_Model;
 	};
+
+	Application* CreateApplication();
 }

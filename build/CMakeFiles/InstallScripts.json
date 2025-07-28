@@ -1,0 +1,17 @@
+{
+	"InstallScripts" : 
+	[
+		"C:/dev/X/build/cmake_install.cmake",
+		"C:/dev/X/build/VulkanEngine/cmake_install.cmake",
+		"C:/dev/X/build/VulkanEngine/vendor/glfw/cmake_install.cmake",
+		"C:/dev/X/build/VulkanEngine/vendor/glfw/src/cmake_install.cmake",
+		"C:/dev/X/build/VulkanEngine/vendor/glfw/docs/cmake_install.cmake",
+		"C:/dev/X/build/VulkanEngine/vendor/glm/cmake_install.cmake",
+		"C:/dev/X/build/VulkanEngine/vendor/glm/glm/cmake_install.cmake",
+		"C:/dev/X/build/VulkanEngine/vendor/tracy/cmake_install.cmake",
+		"C:/dev/X/build/VulkanEngine/vendor/yaml-cpp/cmake_install.cmake",
+		"C:/dev/X/build/VulkanEngine/vendor/yaml-cpp/util/cmake_install.cmake",
+		"C:/dev/X/build/VulkanEngine/vendor/tinygltf/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

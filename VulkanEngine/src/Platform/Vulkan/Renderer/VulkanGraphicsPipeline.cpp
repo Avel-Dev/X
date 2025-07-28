@@ -1,13 +1,12 @@
 #include "VulkanGraphicsPipeline.h"
+#include "Vulkan/Utils/VulkanShaderUtils.h"
 #include "Vulkan/Renderer/VulkanRenderer.h"
 #include "Vulkan/Buffer/VulkanVertexBuffer.h"
-#include "Vulkan/Buffer/VulkanUniformBuffer.h"
-#include "Vulkan/Utils/VulkanShaderUtils.h"
 #include "Vulkan/Assets/VulkanMaterialAsset.h"
 
 namespace CHIKU
 {
-	void VulkanGraphicsPipeline::Init() 
+	void VulkanGraphicsPipeline::mInit() 
 	{
 		ZoneScoped;
 		UniformBufferDescription bufferDescription;
@@ -39,7 +38,7 @@ namespace CHIKU
 		}
 	}
 
-	void VulkanGraphicsPipeline::CleanUp() 
+	void VulkanGraphicsPipeline::mCleanUp() 
 	{
 		ZoneScoped;
 		for (auto& [key, pipelineData] : m_Pipelines)
@@ -63,7 +62,7 @@ namespace CHIKU
 		}
 	}
 
-	PipelineData VulkanGraphicsPipeline::GetPipeline(
+	PipelineData VulkanGraphicsPipeline::mGetPipeline(
 		const std::shared_ptr<MaterialAsset>& materialAsset, 
 		const std::shared_ptr<MeshAsset>& meshAsset) 
 	{
@@ -79,7 +78,7 @@ namespace CHIKU
 		return m_Pipelines[key];
 	}
 
-	void VulkanGraphicsPipeline::BindPipeline(
+	void VulkanGraphicsPipeline::mBindPipeline(
 		const std::shared_ptr<MaterialAsset>& materialAsset,
 		const std::shared_ptr<MeshAsset>& meshAsset) 
 	{
@@ -110,7 +109,7 @@ namespace CHIKU
 
 		std::shared_ptr<VulkanMaterialAsset> vulkanMaterialAsset = std::dynamic_pointer_cast<VulkanMaterialAsset>(materialAsset);
 
-		const auto& [pipeline, pipelineLayout] = GraphicsPipeline::s_Instance->GetPipeline(materialAsset, meshAsset);
+		const auto& [pipeline, pipelineLayout] = GraphicsPipeline::GetPipeline(materialAsset, meshAsset);
 		const auto& sets = vulkanMaterialAsset->GetDescriptorSets(VulkanRenderer::GetCurrentFrame());
 
 		std::vector<VkDescriptorSet> descriptorSets;
@@ -287,7 +286,7 @@ namespace CHIKU
 
 	}
 
-	PipelineData VulkanGraphicsPipeline::CreatePipeline(
+	PipelineData VulkanGraphicsPipeline::mCreatePipeline(
 		const std::shared_ptr<MaterialAsset>& materialAsset,
 		const std::shared_ptr<MeshAsset>& meshAsset) 
 	{

@@ -22,3 +22,6 @@
 [submodule "VulkanEngine/vendor/glfw"]
 	path = VulkanEngine/vendor/glfw
 	url = https://github.com/glfw/glfw.git
+[submodule "VulkanEngine/vendor/spdlog"]
+	path = VulkanEngine/vendor/spdlog
+	url = https://github.com/gabime/spdlog.git

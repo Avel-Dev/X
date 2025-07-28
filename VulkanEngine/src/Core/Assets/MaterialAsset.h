@@ -35,7 +35,7 @@ namespace CHIKU
 		MaterialAsset(AssetHandle handle) : Asset(handle, AssetType::Material) {}
 		MaterialAsset(AssetHandle handle, AssetPath path) : Asset(handle, AssetType::Material, path) {}
 
-		std::shared_ptr<ShaderAsset> GetShader() const { return m_Shader; }
+		SHARED<ShaderAsset> GetShader() const { return m_Shader; }
 
 		virtual void CreateMaterial() = 0;
 		virtual void CreateUniformBuffer() = 0;
@@ -49,12 +49,12 @@ namespace CHIKU
 		Material GetMaterial() const { return m_Material; }
 		virtual void UpdateUniformBuffer(uint32_t currentFrame) = 0;
 
-		static std::shared_ptr<MaterialAsset> Create();
-		static std::shared_ptr<MaterialAsset> Create(AssetHandle handle);
-		static std::shared_ptr<MaterialAsset> Create(AssetHandle handle, AssetPath path);
+		static SHARED<MaterialAsset> Create();
+		static SHARED<MaterialAsset> Create(AssetHandle handle);
+		static SHARED<MaterialAsset> Create(AssetHandle handle, AssetPath path);
 
 	protected:
-		std::shared_ptr<ShaderAsset> m_Shader = nullptr;	
+		SHARED<ShaderAsset> m_Shader = nullptr;	
 		std::map<uint32_t, UniformSetStorage> m_UniformSetStorage; //Key is the set Index
 		Material m_Material;
 	};

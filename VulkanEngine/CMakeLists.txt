@@ -1,48 +1,60 @@
-﻿set(CMAKE_CXX_STANDARD 17)
+﻿cmake_minimum_required(VERSION 3.12)
+project(VulkanEngine)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 if(UNIX AND NOT APPLE)
     add_compile_options(-march=x86-64 -mtune=generic -O2)
 endif()
 
-# set options before add_subdirectory
-# available options: TRACY_ENABLE, TRACY_LTO, TRACY_ON_DEMAND, TRACY_NO_BROADCAST,
-option(TRACY_ENABLE "" ON)
-option(TRACY_ON_DEMAND "" ON)
+# Tracy options
+option(TRACY_ENABLE "Enable Tracy profiler" ON)
+option(TRACY_ON_DEMAND "Enable Tracy on-demand mode" ON)
 
+# Add dependencies
 add_subdirectory("vendor/glfw")
 add_subdirectory("vendor/glm")
 add_subdirectory("vendor/tracy")
 add_subdirectory("vendor/yaml-cpp")
 add_subdirectory("vendor/tinygltf")
-#add_subdirectory("vendor/tinygltf/tinygltf/examples/build-gltf")
+add_subdirectory("vendor/spdlog")
 
-include_directories("src/")
-include_directories("src/Core")
-include_directories("src/Platform")
-include_directories("vendor/tinygltf")
-include_directories("vendor/glfw/include")
-include_directories("vendor/glm")
-include_directories("vendor/stb_image")
-include_directories("vendor/json_nlohmann/include")
-include_directories("vendor/spirv_reflect")
-include_directories("vendor/tracy/public")
-include_directories("vendor/yaml-cpp/include")
- 
-include_directories($ENV{VULKAN_SDK}/include)
-link_directories($ENV{VULKAN_SDK}/lib)
-
-add_compile_options(/EHsc)
-
+# Source files
 file(GLOB_RECURSE SRC_SOURCES "src/**/*.cpp" "src/*.cpp")
+set(SRC_SOURCES ${SRC_SOURCES} "vendor/spirv_reflect/spirv_reflect.cpp")
 
-add_executable(VulkanEngine
-    ${SRC_SOURCES}
-    "vendor/spirv_reflect/spirv_reflect.cpp"
-    "main.cpp")
+# Define the static library
+add_library(VulkanEngine STATIC ${SRC_SOURCES})
 
-message("Source :" ${CMAKE_CURRENT_SOURCE_DIR})
-target_compile_definitions(VulkanEngine PRIVATE CHIKU_SRC_PATH=${CMAKE_CURRENT_SOURCE_DIR}/)
+# Link directories
+target_link_directories(VulkanEngine PUBLIC $ENV{VULKAN_SDK}/lib)
 
+target_compile_options ( VulkanEngine     
+PUBLIC
+    "/utf-8"
+)
+# Include directories
+target_include_directories( VulkanEngine
+PUBLIC
+    src/
+    src/Core
+    src/Platform
+    vendor/tinygltf
+    vendor/spdlog/include
+    vendor/glfw/include
+    vendor/glm
+    vendor/stb_image
+    vendor/json_nlohmann/include
+    vendor/spirv_reflect
+    vendor/tracy/public
+    vendor/yaml-cpp/include
+    $ENV{VULKAN_SDK}/include
+)
+# Set macro for source path
+target_compile_definitions(VulkanEngine PRIVATE CHIKU_SRC_PATH="${CMAKE_CURRENT_SOURCE_DIR}/")
+
+# Platform definitions
 if(WIN32)
     set(VULKAN_LIB vulkan-1)
     target_compile_definitions(VulkanEngine PRIVATE PLT_WINDOWS)
@@ -58,15 +70,17 @@ else()
     message(STATUS "Unknown OS")
 endif()
 
+# Link libraries
 target_link_libraries(VulkanEngine
-PUBLIC
-    glfw
-    Tracy::TracyClient
-    ${VULKAN_LIB}
-    yaml-cpp
-    tinygltf
+    PUBLIC
+        glfw
+        Tracy::TracyClient
+        yaml-cpp
+        tinygltf
+        ${VULKAN_LIB}
 )
 
-if (CMAKE_VERSION VERSION_GREATER 3.12)
-  set_property(TARGET VulkanEngine PROPERTY CXX_STANDARD 20)
+# Exception handling (for MSVC)
+if (MSVC)
+    target_compile_options(VulkanEngine PRIVATE /EHsc)
 endif()

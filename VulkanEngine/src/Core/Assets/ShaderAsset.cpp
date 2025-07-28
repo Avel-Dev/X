@@ -6,13 +6,13 @@
 
 namespace CHIKU
 {
-	std::shared_ptr<ShaderAsset> ShaderAsset::Create()
+	SHARED<ShaderAsset> ShaderAsset::Create()
 	{
 		ZoneScoped;
 		return std::make_shared<VulkanShaderAsset>();
 	}
 
-	std::shared_ptr<ShaderAsset> ShaderAsset::Create(AssetHandle handle)
+	SHARED<ShaderAsset> ShaderAsset::Create(AssetHandle handle)
 	{
 		ZoneScoped;
 		return std::make_shared<VulkanShaderAsset>(handle);

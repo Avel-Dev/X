@@ -1,5 +1,5 @@
 #include "VulkanRenderer.h"
-#include "Vulkan/Utils/VulkanRendererUtility.h"
+#include "DescriptorPool.h"
 #include "Vulkan/Buffer/VulkanUniformBuffer.h"
 #include "Vulkan/Buffer/VulkanVertexBuffer.h"
 #include "Vulkan/Buffer/VulkanIndexBuffer.h"
@@ -10,6 +10,8 @@
 namespace CHIKU
 {
 	uint32_t VulkanRenderer::m_CurrentFrame;
+	QueueFamilyIndices VulkanRenderer::m_QueueFamilyIndices;
+
 
 	VulkanRenderer::VulkanRenderer()
 	{
@@ -44,6 +46,7 @@ namespace CHIKU
 		CreatePhysicalDevice();
 		CreateLogicalDevice();
 		CreateSyncObjects();
+		DescriptorPool::Init();
 
 		m_Commands.Init(m_GraphicsQueue, m_LogicalDevice, m_PhysicalDevice, m_Surface);
 		m_Swapchain.Init(m_Window, m_PhysicalDevice, m_LogicalDevice, m_Surface);
@@ -66,7 +69,7 @@ namespace CHIKU
 
 		vkDeviceWaitIdle(m_LogicalDevice);  // Or vkQueueWaitIdle(queue)
 
-
+		DescriptorPool::CleanUp();
 		m_Commands.CleanUp();
 		m_Swapchain.CleanUp();
 		vkQueueWaitIdle(m_GraphicsQueue);
@@ -82,6 +85,11 @@ namespace CHIKU
 
 		vkQueueWaitIdle(m_GraphicsQueue);
 		vkQueueWaitIdle(m_PresentQueue);
+	}
+
+	void VulkanRenderer::mRecreateSwapChain()
+	{
+		m_Swapchain.RecreateSwapchain(m_Window,m_PhysicalDevice,m_Surface);
 	}
 
 	void VulkanRenderer::mBeginFrame()
@@ -404,10 +412,10 @@ namespace CHIKU
 		createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
 		float queuePriority = 1.0f;
 
-		Utils::QueueFamilyIndices indices = Utils::FindQueueFamilies(m_PhysicalDevice, m_Surface);
+		m_QueueFamilyIndices = Utils::FindQueueFamilies(m_PhysicalDevice, m_Surface);
 
 		std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
-		std::set<uint32_t> uniqueQueueFamilies = { indices.GraphicsFamily.value(), indices.PresentFamily.value() };
+		std::set<uint32_t> uniqueQueueFamilies = { m_QueueFamilyIndices.GraphicsFamily.value(), m_QueueFamilyIndices.PresentFamily.value() };
 
 		for (uint32_t queueFamily : uniqueQueueFamilies) {
 			VkDeviceQueueCreateInfo queueCreateInfo{};
@@ -439,8 +447,8 @@ namespace CHIKU
 			throw std::runtime_error("failed to create logical device!");
 		}
 
-		vkGetDeviceQueue(m_LogicalDevice, indices.GraphicsFamily.value(), 0, &m_GraphicsQueue);
-		vkGetDeviceQueue(m_LogicalDevice, indices.PresentFamily.value(), 0, &m_PresentQueue);
+		vkGetDeviceQueue(m_LogicalDevice, m_QueueFamilyIndices.GraphicsFamily.value(), 0, &m_GraphicsQueue);
+		vkGetDeviceQueue(m_LogicalDevice, m_QueueFamilyIndices.PresentFamily.value(), 0, &m_PresentQueue);
 	}
 
 	void VulkanRenderer::CreateSyncObjects()

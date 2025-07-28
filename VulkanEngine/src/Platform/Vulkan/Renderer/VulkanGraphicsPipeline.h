@@ -5,19 +5,20 @@ namespace CHIKU
 {
 	class VulkanGraphicsPipeline : public GraphicsPipeline
 	{
+
 	public:
-		virtual void Init() override;
-		virtual void CleanUp() override;
+		virtual void mInit() override;
+		virtual void mCleanUp() override;
 
-		virtual PipelineData GetPipeline(
+		virtual PipelineData mGetPipeline(
 			const std::shared_ptr<MaterialAsset>& materialAsset,
 			const std::shared_ptr<MeshAsset>& meshAsset) override;
 
-		virtual PipelineData CreatePipeline(
+		virtual PipelineData mCreatePipeline(
 			const std::shared_ptr<MaterialAsset>& materialAsset,
 			const std::shared_ptr<MeshAsset>& meshAsset) override;
 
-		virtual void BindPipeline(
+		virtual void mBindPipeline(
 			const std::shared_ptr<MaterialAsset>& materialAsset,
 			const std::shared_ptr<MeshAsset>& meshAsset) override;
 

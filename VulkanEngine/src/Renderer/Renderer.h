@@ -15,11 +15,14 @@ namespace CHIKU
 
 		static void BeginFrame() { s_Instance->mBeginFrame(); }
 		static void EndFrame() { s_Instance->mEndFrame(); }
+		static void RecreateSwapChain() { s_Instance->mRecreateSwapChain(); }
 
 		static void* GetRenderPass() { return s_Instance->mGetRenderPass(); }
 		static void* GetCommandBuffer() { return s_Instance->mGetCommandBuffer(); }
 		static void* GetDevice() { return s_Instance->mGetDevice(); }
 		static void* GetPhysicalDevice() { return s_Instance->mGetPhysicalDevice(); }
+		static void* GetInstance() { return s_Instance->mGetInstance(); }
+
 
 		static void* BeginSingleTimeCommands() { return s_Instance->mBeginSingleTimeCommands(); }
 		static void EndSingleTimeCommands(void* cmdBuffer) { return s_Instance->mEndSingleTimeCommands(cmdBuffer); }
@@ -34,6 +37,9 @@ namespace CHIKU
 		virtual void mBeginFrame() = 0;
 		virtual void mEndFrame() = 0;
 
+		virtual void mRecreateSwapChain() = 0;
+
+		virtual void* mGetInstance() = 0;
 		virtual void* mGetRenderPass() = 0;
 		virtual void* mGetCommandBuffer() = 0;
 		virtual void* mGetDevice() = 0;

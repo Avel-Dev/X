@@ -12,7 +12,7 @@
 
 namespace CHIKU
 {
-	std::unordered_map<AssetHandle, std::shared_ptr<Asset>> AssetManager::m_Assets;
+	std::unordered_map<AssetHandle, SHARED<Asset>> AssetManager::m_Assets;
 	std::unordered_map<ReadableHandle,AssetHandle> AssetManager::m_Shaders;
 
 	void AssetManager::Init()
@@ -20,18 +20,15 @@ namespace CHIKU
 		ZoneScoped;
 	}
 
-	std::shared_ptr<Asset> AssetManager::LoadAsset(const AssetHandle& handle)
+	SHARED<Asset> AssetManager::LoadAsset(const AssetHandle& handle)
 	{
 		ZoneScoped;
 		if (m_Assets.find(handle) != m_Assets.end())
 		{
 			return m_Assets[handle];
 		}
-		else
-		{
-			std::cerr << "Asset with handle " << handle << " not found!" << std::endl;
-		}
-
+		
+		LOG_ERROR("Asset with handle not found! handle: " + handle);
 		return nullptr;
 	}
 
@@ -49,7 +46,7 @@ namespace CHIKU
 		ZoneScoped;
 
 		AssetHandle newHandle = Utils::GetRandomNumber<AssetHandle>();
-		std::shared_ptr<MeshAsset> meshAsset = MeshAsset::Create(newHandle);
+		SHARED<MeshAsset> meshAsset = MeshAsset::Create(newHandle);
 		m_Assets[newHandle] = meshAsset;
 
 		meshAsset->SetMetaData(metaData);
@@ -74,13 +71,13 @@ namespace CHIKU
 	{
 		ZoneScoped;
 		AssetHandle newHandle = Utils::GetRandomNumber<AssetHandle>();
-		std::shared_ptr<ShaderAsset> shaderAsset = ShaderAsset::Create(newHandle);
+		SHARED<ShaderAsset> shaderAsset = ShaderAsset::Create(newHandle);
 		shaderAsset->CreateShader(path);
 		m_Assets[newHandle] = shaderAsset;
 
 		if (m_Shaders.find(shaderAsset->GetShaderHandle()) != m_Shaders.end()) 
 		{
-			throw std::runtime_error("Shader already exists; new shader being created with a existing shader handle");
+			LOG_ERROR("Shader already exists with handle: " + shaderAsset->GetShaderHandle());
 		}
 
 		m_Shaders[shaderAsset->GetShaderHandle()] = newHandle;
@@ -110,7 +107,7 @@ namespace CHIKU
 		return Asset::InvalidHandle;
 	}
 
-	std::shared_ptr<Asset> AssetManager::GetAsset(const AssetHandle& assetHandle)
+	SHARED<Asset> AssetManager::GetAsset(const AssetHandle& assetHandle)
 	{
 		ZoneScoped;
 

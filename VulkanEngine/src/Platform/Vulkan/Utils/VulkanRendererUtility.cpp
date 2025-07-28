@@ -1,5 +1,5 @@
 #include "VulkanRendererUtility.h"
-#include "Renderer/Renderer.h"
+#include "Vulkan/Renderer/VulkanRenderer.h"
 #include <vector>
 
 namespace CHIKU
@@ -23,11 +23,11 @@ namespace CHIKU
 			throw std::runtime_error("failed to find suitable memory type!");
 		}
 
-		QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR surface)
+		CHIKU::QueueFamilyIndices FindQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR surface)
 		{
 			ZoneScoped;
 
-			QueueFamilyIndices indices;
+			CHIKU::QueueFamilyIndices indices;
 			uint32_t queueFamilyCount = 0;
 			vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
 
@@ -135,7 +135,7 @@ namespace CHIKU
 		{
 			ZoneScoped;
 
-			QueueFamilyIndices indices = FindQueueFamilies(device, surface);
+			CHIKU::QueueFamilyIndices indices = FindQueueFamilies(device, surface);
 
 			bool extensionsSupported = CheckDeviceExtensionSupport(device, deviceExtensions);
 

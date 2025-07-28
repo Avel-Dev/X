@@ -124,4 +124,126 @@ namespace CHIKU
         RightSuper = 347,
         Menu = 348
     };
+
+    static const char* KeyCodeToString(KeyCode code) {
+        switch (code) {
+        case KeyCode::Space: return "Space";
+        case KeyCode::Apostrophe: return "'";
+        case KeyCode::Comma: return ",";
+        case KeyCode::Minus: return "-";
+        case KeyCode::Period: return ".";
+        case KeyCode::Slash: return "/";
+
+        case KeyCode::D0: return "0";
+        case KeyCode::D1: return "1";
+        case KeyCode::D2: return "2";
+        case KeyCode::D3: return "3";
+        case KeyCode::D4: return "4";
+        case KeyCode::D5: return "5";
+        case KeyCode::D6: return "6";
+        case KeyCode::D7: return "7";
+        case KeyCode::D8: return "8";
+        case KeyCode::D9: return "9";
+
+        case KeyCode::Semicolon: return ";";
+        case KeyCode::Equal: return "=";
+
+        case KeyCode::A: return "A";
+        case KeyCode::B: return "B";
+        case KeyCode::C: return "C";
+        case KeyCode::D: return "D";
+        case KeyCode::E: return "E";
+        case KeyCode::F: return "F";
+        case KeyCode::G: return "G";
+        case KeyCode::H: return "H";
+        case KeyCode::I: return "I";
+        case KeyCode::J: return "J";
+        case KeyCode::K: return "K";
+        case KeyCode::L: return "L";
+        case KeyCode::M: return "M";
+        case KeyCode::N: return "N";
+        case KeyCode::O: return "O";
+        case KeyCode::P: return "P";
+        case KeyCode::Q: return "Q";
+        case KeyCode::R: return "R";
+        case KeyCode::S: return "S";
+        case KeyCode::T: return "T";
+        case KeyCode::U: return "U";
+        case KeyCode::V: return "V";
+        case KeyCode::W: return "W";
+        case KeyCode::X: return "X";
+        case KeyCode::Y: return "Y";
+        case KeyCode::Z: return "Z";
+
+        case KeyCode::LeftBracket: return "[";
+        case KeyCode::Backslash: return "\\";
+        case KeyCode::RightBracket: return "]";
+        case KeyCode::GraveAccent: return "`";
+
+        case KeyCode::Escape: return "Escape";
+        case KeyCode::Enter: return "Enter";
+        case KeyCode::Tab: return "Tab";
+        case KeyCode::Backspace: return "Backspace";
+        case KeyCode::Insert: return "Insert";
+        case KeyCode::Delete: return "Delete";
+        case KeyCode::Right: return "Right";
+        case KeyCode::Left: return "Left";
+        case KeyCode::Down: return "Down";
+        case KeyCode::Up: return "Up";
+        case KeyCode::PageUp: return "PageUp";
+        case KeyCode::PageDown: return "PageDown";
+        case KeyCode::Home: return "Home";
+        case KeyCode::End: return "End";
+
+        case KeyCode::CapsLock: return "CapsLock";
+        case KeyCode::ScrollLock: return "ScrollLock";
+        case KeyCode::NumLock: return "NumLock";
+        case KeyCode::PrintScreen: return "PrintScreen";
+        case KeyCode::Pause: return "Pause";
+
+        case KeyCode::F1: return "F1";
+        case KeyCode::F2: return "F2";
+        case KeyCode::F3: return "F3";
+        case KeyCode::F4: return "F4";
+        case KeyCode::F5: return "F5";
+        case KeyCode::F6: return "F6";
+        case KeyCode::F7: return "F7";
+        case KeyCode::F8: return "F8";
+        case KeyCode::F9: return "F9";
+        case KeyCode::F10: return "F10";
+        case KeyCode::F11: return "F11";
+        case KeyCode::F12: return "F12";
+
+        case KeyCode::KP0: return "Keypad 0";
+        case KeyCode::KP1: return "Keypad 1";
+        case KeyCode::KP2: return "Keypad 2";
+        case KeyCode::KP3: return "Keypad 3";
+        case KeyCode::KP4: return "Keypad 4";
+        case KeyCode::KP5: return "Keypad 5";
+        case KeyCode::KP6: return "Keypad 6";
+        case KeyCode::KP7: return "Keypad 7";
+        case KeyCode::KP8: return "Keypad 8";
+        case KeyCode::KP9: return "Keypad 9";
+        case KeyCode::KPDecimal: return "Keypad .";
+        case KeyCode::KPDivide: return "Keypad /";
+        case KeyCode::KPMultiply: return "Keypad *";
+        case KeyCode::KPSubtract: return "Keypad -";
+        case KeyCode::KPAdd: return "Keypad +";
+        case KeyCode::KPEnter: return "Keypad Enter";
+        case KeyCode::KPEqual: return "Keypad =";
+
+        case KeyCode::LeftShift: return "Left Shift";
+        case KeyCode::LeftControl: return "Left Ctrl";
+        case KeyCode::LeftAlt: return "Left Alt";
+        case KeyCode::LeftSuper: return "Left Super";
+        case KeyCode::RightShift: return "Right Shift";
+        case KeyCode::RightControl: return "Right Ctrl";
+        case KeyCode::RightAlt: return "Right Alt";
+        case KeyCode::RightSuper: return "Right Super";
+        case KeyCode::Menu: return "Menu";
+
+        default: return "Unknown";
+        }
+    }
+
 }

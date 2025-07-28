@@ -4,7 +4,6 @@
 #include <glm/glm.hpp>
 #include <bitset>
 
-
 namespace CHIKU
 {
 	//GLTF attrute order and name

@@ -22,6 +22,6 @@ namespace CHIKU
 		//The meshes inside the model and the materils for each mesh
 		std::unordered_map<AssetHandle, AssetHandle> m_MeshesMaterials;
 
-		std::unordered_map<std::shared_ptr<MeshAsset>, std::shared_ptr<MaterialAsset>> m_MeshesMaterialsAssets;
+		std::unordered_map<SHARED<MeshAsset>, SHARED<MaterialAsset>> m_MeshesMaterialsAssets;
 	};
 }

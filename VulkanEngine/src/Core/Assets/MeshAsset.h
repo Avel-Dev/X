@@ -32,18 +32,18 @@ namespace CHIKU
 		
 		inline uint64_t GetVertexCount() const { return m_VertexBuffer->GetCount(); }
 
-		inline const std::shared_ptr<VertexBuffer> GetVertexBuffer() const { return m_VertexBuffer; }
-		inline const std::shared_ptr<IndexBuffer> GetIndexBuffer() const { return m_IndexBuffer; }
+		inline const SHARED<VertexBuffer> GetVertexBuffer() const { return m_VertexBuffer; }
+		inline const SHARED<IndexBuffer> GetIndexBuffer() const { return m_IndexBuffer; }
 		
 		inline void Bind() const { m_VertexBuffer->Bind(); };
 		virtual void Draw() const = 0;
 
-		static std::shared_ptr<MeshAsset> Create();
-		static std::shared_ptr<MeshAsset> Create(AssetHandle handle);
-		static std::shared_ptr<MeshAsset> Create(AssetHandle handle, AssetPath path);
+		static SHARED<MeshAsset> Create();
+		static SHARED<MeshAsset> Create(AssetHandle handle);
+		static SHARED<MeshAsset> Create(AssetHandle handle, AssetPath path);
 
 	protected:
-		std::shared_ptr<VertexBuffer> m_VertexBuffer;
-		std::shared_ptr<IndexBuffer> m_IndexBuffer;
+		SHARED<VertexBuffer> m_VertexBuffer;
+		SHARED<IndexBuffer> m_IndexBuffer;
 	};
 }

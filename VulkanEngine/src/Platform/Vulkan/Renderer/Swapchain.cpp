@@ -1,4 +1,5 @@
 #include "Swapchain.h"
+#include "VulkanRenderer.h"
 #include "Vulkan/Utils/VulkanRendererUtility.h"
 #include "Vulkan/Utils/VulkanImageUtils.h"
 
@@ -54,6 +55,7 @@ namespace CHIKU
 
         CleanUp();
         CreateSwapchain(window,physicalDevice,surface);
+		CreateRenderpass(physicalDevice);
         CreateImageViews();
         CreateDepthResources(physicalDevice);
         CreateFrameBuffers();
@@ -230,10 +232,9 @@ namespace CHIKU
         createInfo.imageArrayLayers = 1;
         createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
-        Utils::QueueFamilyIndices indices = Utils::FindQueueFamilies(physicalDevice,surface);
-        uint32_t queueFamilyIndices[] = { indices.GraphicsFamily.value(), indices.PresentFamily.value() };
+        uint32_t queueFamilyIndices[] = { VulkanRenderer::GetGraphicsQueueFamilyIndex(), VulkanRenderer::GetPresentQueueFamilyIndex()};
 
-        if (indices.GraphicsFamily != indices.PresentFamily)
+        if (queueFamilyIndices[0] != queueFamilyIndices[1])
         {
             createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
             createInfo.queueFamilyIndexCount = 2;

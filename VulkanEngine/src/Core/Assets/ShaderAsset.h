@@ -44,8 +44,8 @@ namespace CHIKU
 		const std::unordered_map<ShaderStages,ShaderStageData>& GetShaderStage() { return m_ShaderStage; }
         ReadableHandle GetShaderHandle() const { return m_ShaderHandle; }
 
-        static std::shared_ptr<ShaderAsset> Create();
-        static std::shared_ptr<ShaderAsset> Create(AssetHandle handle);
+        static SHARED<ShaderAsset> Create();
+        static SHARED<ShaderAsset> Create(AssetHandle handle);
 
     protected:
 		std::vector<AssetPath> m_ShaderCodes;

@@ -1,29 +1,39 @@
 #include "Application.h"
 #include "Vulkan/Utils/VulkanShaderUtils.h"
-#include "Platform/Vulkan/Renderer/DescriptorPool.h"    
-#include "Renderer/GraphicsPipeline.h"
-#include "Assets/ModelAsset.h"
 #include "Assets/AssetManager.h"
+#include "Renderer/GraphicsPipeline.h"
 
 namespace CHIKU
 {
+	ApplicationData Application::s_Data;
+	EventBus Application::m_EventBus;
+
+	Application::Application()
+	{
+		m_Window.SetTitle("Chiku Editor");
+		m_Window.SetSize(1280, 720);
+		m_Window.Create();
+
+#ifdef CHIKU_ENABLE_LOGGING
+		Logger::Init("VulkanEngine");
+#endif // CHIKU_ENABLE_LOGGING
+
+		Renderer::Init(m_Window.GetWindow());
+		AssetManager::Init();
+		GraphicsPipeline::Init();
+
+		s_Data.eventHandler = [this](Event& event) -> void
+		{
+			Publish(event);
+		};
+
+		CHIKU::AssetManager::AddShader({ "src/Shaders/unlit/unlit.vert", "src/Shaders/unlit/unlit.frag" });
+		CHIKU::AssetManager::AddShader({ "src/Shaders/Defaultlit/defaultlit.vert", "src/Shaders/Defaultlit/defaultlit.frag" });
+	}
+
 	void Application::Init()
 	{
 		ZoneScoped;    // Profile this block
-
-		m_Window.Init();
-		Renderer::Init(m_Window.GetWindow());
-		AssetManager::Init();
-		DescriptorPool::Init();
-		GraphicsPipeline::s_Instance->Init();
-
-		//AssetManager::AddShader({ "Shaders/Unlit/unlit.vert", "Shaders/Unlit/unlit.frag" });
-		AssetManager::AddShader({ "Shaders/Defaultlit/defaultlit.vert", "Shaders/Defaultlit/defaultlit.frag" });
-		AssetHandle model = AssetManager::AddModel("Models/Y Bot/Y Bot.gltf");
-
-		std::shared_ptr<Asset> asset = AssetManager::GetAsset(model);
-		m_Model = std::dynamic_pointer_cast<ModelAsset>(asset);
-
 	}
 
 	void Application::Run()
@@ -32,6 +42,7 @@ namespace CHIKU
 		while (!m_Window.WindowShouldClose())
 		{
 			FrameMark;
+			m_Window.WindowPoolEvent();
 		}
 	}
 
@@ -39,11 +50,15 @@ namespace CHIKU
 	void Application::Render()
 	{
 		ZoneScoped;
-
 		while (!m_Window.WindowShouldClose())
 		{
 			FrameMark;
 			m_Window.WindowPoolEvent();
+			if (s_Data.framebufferResized)
+			{
+				Renderer::RecreateSwapChain();
+				s_Data.framebufferResized = false;
+			}
 			Renderer::BeginFrame();
 			m_Model->Draw();
 			Renderer::EndFrame();
@@ -55,7 +70,6 @@ namespace CHIKU
 		ZoneScoped;
 
 		Renderer::Wait();
-		DescriptorPool::CleanUp();
 		AssetManager::CleanUp();
 		GraphicsPipeline::s_Instance->CleanUp();
 		Renderer::CleanUp();

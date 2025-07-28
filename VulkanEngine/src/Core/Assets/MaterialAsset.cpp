@@ -12,19 +12,19 @@
 namespace CHIKU
 {
     
-    std::shared_ptr<MaterialAsset> MaterialAsset::Create()
+    SHARED<MaterialAsset> MaterialAsset::Create()
     {
         ZoneScoped;
         return std::make_shared<VulkanMaterialAsset>();
 	}
 
-    std::shared_ptr<MaterialAsset> MaterialAsset::Create(AssetHandle handle)
+    SHARED<MaterialAsset> MaterialAsset::Create(AssetHandle handle)
     {
         ZoneScoped;
         return std::make_shared<VulkanMaterialAsset>(handle);
     }
 
-    std::shared_ptr<MaterialAsset> MaterialAsset::Create(AssetHandle handle, AssetPath path)
+    SHARED<MaterialAsset> MaterialAsset::Create(AssetHandle handle, AssetPath path)
     {
         ZoneScoped;
         return std::make_shared<VulkanMaterialAsset>(handle,path);

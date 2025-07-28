@@ -1,0 +1,4 @@
+# CMake generation dependency list for this directory.
+C:/Program Files/CMake/share/cmake-4.0/Modules/GNUInstallDirs.cmake
+C:/dev/X/VulkanEngine/vendor/glm/CMakeLists.txt
+C:/dev/X/build/CMakeFiles/cmake.verify_globs

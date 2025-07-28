@@ -1,5 +1,6 @@
 #include "Commands.h"
 #include "Vulkan/Utils/VulkanRendererUtility.h"
+#include "VulkanRenderer.h"
 
 namespace CHIKU
 {
@@ -80,12 +81,10 @@ namespace CHIKU
 	{
 		ZoneScoped;
 
-		Utils::QueueFamilyIndices queueFamilyIndices = Utils::FindQueueFamilies(physicalDevice,surface);
-
 		VkCommandPoolCreateInfo poolInfo{};
 		poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
 		poolInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-		poolInfo.queueFamilyIndex = queueFamilyIndices.GraphicsFamily.value();
+		poolInfo.queueFamilyIndex = VulkanRenderer::GetGraphicsQueueFamilyIndex();
 
 		if (vkCreateCommandPool(m_LogicalDevice, &poolInfo, nullptr, &m_CommandPool) != VK_SUCCESS)
 		{

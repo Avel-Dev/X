@@ -1,54 +1,41 @@
 #pragma once
 #include "Event.h"
-#include "VulkanEngine/Input/Mousecode.h"
+
 
 namespace CHIKU
 {
-	class MouseButtonEvent : public Event
+#define WINDOW_RESIZE_EVENT STR(WindowResize)
+#define WINDOW_CLOSE_EVENT STR(WindowClose)
+
+	class WindowEvent : public Event
 	{
 	public:
-		MouseButtonEvent(MouseCode button) : m_Button(button) {}
-		MouseCode GetMouseCode() const { return m_Button; }
-
-		int GetCategoryFlags() const override { return EventCategoryMouse | EventCategoryInput; }
-
-	protected:
-		MouseCode m_Button;
+		WindowEvent() = default;
+		int GetCategoryFlags() const override { return EventCategoryApplication ; }
 	};
 
-	class MousePressedEvent : public MouseButtonEvent
+	class WindowResizeEvent : public WindowEvent
 	{
 	public:
-		MousePressedEvent(MouseCode button) : MouseButtonEvent(button) {}
+		WindowResizeEvent(uint32_t width, uint32_t height) : WindowEvent() 
+		{
+			m_Width = width;
+			m_Height = height;
+		}
 
-		EventType GetEventType() const override { return EventType::MouseButtonPressed; }
-		const char* GetName() const override { return "MousePressed"; }
+		EventType GetEventType() const override { return EventType::WindowResize; }
+		const char* GetName() const override { return WINDOW_RESIZE_EVENT; }
+
+		uint32_t m_Width = 0;
+		uint32_t m_Height = 0;
 	};
 
-	class MouseReleasedEvent : public MouseButtonEvent
+	class WindowCloseEvent : public WindowEvent
 	{
 	public:
-		MouseReleasedEvent(MouseCode button) : MouseButtonEvent(button) {}
+		WindowCloseEvent() : WindowEvent() {}
 
-		EventType GetEventType() const override { return EventType::MouseButtonReleased; }
-		const char* GetName() const override { return "MouseReleased"; }
-	};
-
-	class MouseMovedEvent : public MouseButtonEvent
-	{
-	public:
-		MouseMovedEvent(MouseCode button) : MouseButtonEvent(button) {}
-
-		EventType GetEventType() const override { return EventType::MouseMoved; }
-		const char* GetName() const override { return "MouseMoved"; }
-	};
-
-	class MouseScrolledEvent : public MouseButtonEvent
-	{
-	public:
-		MouseScrolledEvent(MouseCode button) : MouseButtonEvent(button) {}
-
-		EventType GetEventType() const override { return EventType::MouseScrolled; }
-		const char* GetName() const override { return "MouseScrolled"; }
+		EventType GetEventType() const override { return EventType::WindowClose; }
+		const char* GetName() const override { return WINDOW_CLOSE_EVENT; }
 	};
 }

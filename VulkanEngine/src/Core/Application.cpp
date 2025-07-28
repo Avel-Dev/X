@@ -27,7 +27,7 @@ namespace CHIKU
 			Publish(event);
 		};
 
-		CHIKU::AssetManager::AddShader({ "src/Shaders/unlit/unlit.vert", "src/Shaders/unlit/unlit.frag" });
+		CHIKU::AssetManager::AddShader({ "src/Shaders/Unlit/unlit.vert", "src/Shaders/Unlit/unlit.frag" });
 		CHIKU::AssetManager::AddShader({ "src/Shaders/Defaultlit/defaultlit.vert", "src/Shaders/Defaultlit/defaultlit.frag" });
 	}
 
@@ -60,7 +60,6 @@ namespace CHIKU
 				s_Data.framebufferResized = false;
 			}
 			Renderer::BeginFrame();
-			m_Model->Draw();
 			Renderer::EndFrame();
 		}
 	}

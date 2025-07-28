@@ -30,10 +30,12 @@ add_library(VulkanEngine STATIC ${SRC_SOURCES})
 # Link directories
 target_link_directories(VulkanEngine PUBLIC $ENV{VULKAN_SDK}/lib)
 
+if(WIN32)
 target_compile_options ( VulkanEngine     
 PUBLIC
-    "/utf-8"
-)
+"/utf-8")
+endif()
+
 # Include directories
 target_include_directories( VulkanEngine
 PUBLIC

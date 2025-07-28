@@ -48,7 +48,6 @@ namespace CHIKU
 		Window m_Window;
 		bool m_applicationRunning = true;
 		bool m_sessionRunning = false;
-		std::shared_ptr<ModelAsset> m_Model;
 	};
 
 	Application* CreateApplication();

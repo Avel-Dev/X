@@ -98,8 +98,8 @@ namespace CHIKU
                     }
                     else if (uniformBuffer.isSampler())
                     {
-                        std::cout << uniformBuffer.SamplerInfo.Count << "\n";
-                        std::cout << ToString(uniformBuffer.SamplerInfo.DescriptorType) << "\n";
+                        std::cout << uniformBuffer.BufferSamplerInfo.Count << "\n";
+                        std::cout << ToString(uniformBuffer.BufferSamplerInfo.DescriptorType) << "\n";
                     }
                 }
             }
@@ -250,7 +250,7 @@ namespace CHIKU
                         sampler.Count = binding->count;
                         sampler.DescriptorType = ConvertToOpaqueType(binding);
 
-                        uniformBuffer.SamplerInfo = std::move(sampler);
+                        uniformBuffer.BufferSamplerInfo = std::move(sampler);
                     }
 
                     uniformBuffer.Stages.set(MapReflectStage(spirv.shader_stage));

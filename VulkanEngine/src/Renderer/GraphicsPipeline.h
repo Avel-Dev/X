@@ -11,12 +11,12 @@ namespace CHIKU
 	struct PipelineKey
 	{
 		AssetHandle MaterialAssetHandle;
-		VertexBufferMetaData VertexBufferMetaData;
+		VertexBufferMetaData PipelineVertexBufferMetaData;
 
 		bool operator==(const PipelineKey& other) const
 		{
 			return MaterialAssetHandle == other.MaterialAssetHandle &&
-				VertexBufferMetaData == other.VertexBufferMetaData;
+				PipelineVertexBufferMetaData == other.PipelineVertexBufferMetaData;
 		}
 	};
 }
@@ -29,7 +29,7 @@ namespace std {
 		{
 			std::size_t seed = 0;
 			CHIKU::Utils::hash_combine(seed, std::hash<CHIKU::AssetHandle>()(key.MaterialAssetHandle));
-			CHIKU::Utils::hash_combine(seed, std::hash<CHIKU::VertexBufferMetaData>()(key.VertexBufferMetaData));
+			CHIKU::Utils::hash_combine(seed, std::hash<CHIKU::VertexBufferMetaData>()(key.PipelineVertexBufferMetaData));
 			return seed;
 		}
 	};

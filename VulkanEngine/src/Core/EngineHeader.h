@@ -41,8 +41,8 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/hash.hpp>
 
-#include <tracy/tracy.hpp>
-#include <tracy/tracyC.h>
+#include <tracy/Tracy.hpp>
+#include <tracy/TracyC.h>
 
 #include <stdexcept>
 #include <vector>

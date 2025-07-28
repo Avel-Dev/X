@@ -10,12 +10,6 @@ namespace Editor
 	{
 		m_Window.SetTitle("Editor");
 		m_Window.SetSize(1680, 945);
-
-		//AssetManager::AddShader({ "Shaders/Unlit/unlit.vert", "Shaders/Unlit/unlit.frag" });
-		CHIKU::AssetHandle model = CHIKU::AssetManager::AddModel("Models/Y Bot/Y Bot.gltf");
-
-		SHARED<CHIKU::Asset> asset = CHIKU::AssetManager::GetAsset(model);
-		m_Model = std::dynamic_pointer_cast<CHIKU::ModelAsset>(asset);
 	}
 }
 

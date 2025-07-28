@@ -90,7 +90,7 @@ namespace CHIKU
 
     struct UniformBuffer
     {
-        SamplerInfo SamplerInfo;
+        SamplerInfo BufferSamplerInfo;
         std::vector<UniformMemberInfo> UniformBufferInfo;
         std::bitset<ShaderStages::Stage_Count> Stages;
         uint32_t Size;
@@ -100,7 +100,7 @@ namespace CHIKU
         }
 
         bool isSampler() const {
-            return SamplerInfo.isValid();
+            return BufferSamplerInfo.isValid();
         }
 
         bool isValid() const {

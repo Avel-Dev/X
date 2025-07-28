@@ -1,6 +1,6 @@
 #pragma once
 #include "Event.h"
-#include "Input/Keycode.h"
+#include "Input/KeyCode.h"
 
 namespace CHIKU
 {

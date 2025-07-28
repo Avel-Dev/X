@@ -15,3 +15,4 @@ project ("VulkanEngine")
 # Include sub-projects.
 add_subdirectory ("VulkanEngine")
 add_subdirectory ("Editor")
+add_subdirectory ("OpenXR")

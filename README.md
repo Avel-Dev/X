@@ -33,7 +33,7 @@ This repository contains a Vulkan-based graphics application with cross-platform
       It should print something like: C:\VulkanSDK\1.4.309.0
 4. **Clone the Repository**
    ```bash
-   git clone --recurse-submodules https://github.com/Arumugavel17/Vulkan.git
+   git clone --recurse-submodules https://github.com/Avel-Dev/X.git
    ```
 
 5. **Open the Project in Visual Studio**
@@ -126,9 +126,10 @@ Make sure `cmake`, `g++`, and `git` are also installed.
 ## 📂 Repository Structure
 
 ```
-Vulkan/
-├── src/                    # Source files
-├── vendor/                 # Submodules like GLFW
+X/
+├── Editor/                 # 2D Editor
+├── OpenXR/                 # OpenXR Code
+├── VulkanEngine/            # Main Vulkan Based Engine
 ├── CMakeLists.txt          # CMake build configuration
 └── README.md               # This file
 ```

@@ -44,6 +44,8 @@ namespace CHIKU
 	protected:
 		static EventBus m_EventBus;
 		static ApplicationData s_Data;
+		SHARED<ModelAsset> m_Model;
+
 
 		Window m_Window;
 		bool m_applicationRunning = true;

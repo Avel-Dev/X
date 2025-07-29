@@ -71,7 +71,7 @@ namespace CHIKU
 #define LOG_INFO(...)     CHIKU::Logger::Info(__VA_ARGS__)
 #define LOG_WARN(...)     CHIKU::Logger::Warn(__VA_ARGS__)
 #define LOG_ERROR(...)    CHIKU::Logger::Error(__VA_ARGS__); \
-DEBUG_BREAK;
+DEBUG_BREAK
 
 #define LOG_CRITICAL(...) CHIKU::Logger::Critical(__VA_ARGS__); \
 DEBUG_BREAK

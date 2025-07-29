@@ -27,8 +27,12 @@ namespace CHIKU
 			Publish(event);
 		};
 
-		CHIKU::AssetManager::AddShader({ "src/Shaders/Unlit/unlit.vert", "src/Shaders/Unlit/unlit.frag" });
-		CHIKU::AssetManager::AddShader({ "src/Shaders/Defaultlit/defaultlit.vert", "src/Shaders/Defaultlit/defaultlit.frag" });
+		AssetManager::AddShader({ "src/Shaders/Unlit/unlit.vert", "src/Shaders/Unlit/unlit.frag" });
+		AssetManager::AddShader({ "src/Shaders/Defaultlit/defaultlit.vert", "src/Shaders/Defaultlit/defaultlit.frag" });
+
+		auto assetHandle = AssetManager::AddModel({ "Models/Y Bot/Y Bot.gltf"});
+		m_Model = std::dynamic_pointer_cast<ModelAsset>(AssetManager::GetAsset(assetHandle));
+
 	}
 
 	void Application::Init()
@@ -60,6 +64,7 @@ namespace CHIKU
 				s_Data.framebufferResized = false;
 			}
 			Renderer::BeginFrame();
+			m_Model->Draw();
 			Renderer::EndFrame();
 		}
 	}

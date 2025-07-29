@@ -37,16 +37,26 @@ namespace CHIKU
 		m_Window = window;
 		if (m_Window == nullptr)
 		{
-			throw std::runtime_error("GLFWwindow is required for Vulkan Engine");
+			LOG_ERROR("GLFWwindow is required for Vulkan Engine");
 		}
 
+		volkInitialize();               // Optional (loads global Vulkan functions)
 		GetRequiredExtensions();
 		CreateInstance();
+		volkLoadInstance(m_Instance);  // Required by Meta XR Simulator
 		CreateSurface();
 		CreatePhysicalDevice();
 		CreateLogicalDevice();
+		volkLoadDevice(m_LogicalDevice);
 		CreateSyncObjects();
 		DescriptorPool::Init();
+
+		auto instance = volkGetLoadedInstance();
+
+		if (instance == m_Instance)
+		{
+			LOG_INFO("volk get right");
+		}
 
 		m_Commands.Init(m_GraphicsQueue, m_LogicalDevice, m_PhysicalDevice, m_Surface);
 		m_Swapchain.Init(m_Window, m_PhysicalDevice, m_LogicalDevice, m_Surface);
@@ -106,7 +116,7 @@ namespace CHIKU
 		}
 		else if (result != VK_SUCCESS)
 		{
-			throw std::runtime_error("failed to present swap chain image!");
+			LOG_ERROR("failed to present swap chain image!");
 		}
 		VkCommandBuffer commandBuffer = m_Commands.GetCommandBuffer(m_CurrentFrame);
 
@@ -137,7 +147,7 @@ namespace CHIKU
 		vkResetFences(m_LogicalDevice, 1, &m_InFlightFence[m_CurrentFrame]);
 		if (vkQueueSubmit(m_GraphicsQueue, 1, &submitInfo, m_InFlightFence[m_CurrentFrame]) != VK_SUCCESS)
 		{
-			throw std::runtime_error("failed to submit draw command buffer!");
+			LOG_ERROR("failed to submit draw command buffer!");
 		}
 
 		VkSwapchainKHR swapChains[] = { m_Swapchain.GetSwapchain() };
@@ -166,7 +176,7 @@ namespace CHIKU
 
 		if (vkBeginCommandBuffer(commandBuffer, &beginInfo) != VK_SUCCESS)
 		{
-			throw std::runtime_error("failed to begin recording command buffer!");
+			LOG_ERROR("failed to begin recording command buffer!");
 		}
 
 		m_Swapchain.BeginRenderPass(commandBuffer, m_ImageIndex);
@@ -180,7 +190,7 @@ namespace CHIKU
 
 		if (vkEndCommandBuffer(commandBuffer) != VK_SUCCESS)
 		{
-			throw std::runtime_error("failed to record command buffer!");
+			LOG_ERROR("failed to record command buffer!");
 		}
 	}
 
@@ -198,11 +208,28 @@ namespace CHIKU
 #endif
 	}
 
-	VKAPI_ATTR VkBool32 VKAPI_CALL VulkanRenderer::DebugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData)
+	VKAPI_ATTR VkBool32 VKAPI_CALL VulkanRenderer::DebugCallback(
+		VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
+		VkDebugUtilsMessageTypeFlagsEXT messageType,
+		const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
+		void* pUserData)
 	{
 		ZoneScoped;
 
-		std::cerr << "validation layer: " << pCallbackData->pMessage << std::endl;
+		// Severity handling
+		if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT) {
+			LOG_ERROR(FMT_STRING("validation layer (ERROR): {}"), pCallbackData->pMessage);
+		}
+		else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT) {
+			LOG_WARN(FMT_STRING("validation layer (WARNING): {}"), pCallbackData->pMessage);
+		}
+		else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT) {
+			LOG_INFO(FMT_STRING("validation layer (INFO): {}"), pCallbackData->pMessage);
+		}
+		else if (messageSeverity & VK_DEBUG_UTILS_MESSAGE_SEVERITY_VERBOSE_BIT_EXT) {
+			LOG_TRACE(FMT_STRING("validation layer (VERBOSE): {}"), pCallbackData->pMessage);
+		}
+
 		return VK_FALSE;
 	}
 
@@ -277,7 +304,7 @@ namespace CHIKU
 #ifdef ENABLE_VALIDATION_LAYERS
 		if (!CheckValidationLayerSupport())
 		{
-			throw std::runtime_error("validation layers requested, but not available!");
+			LOG_ERROR("validation layers requested, but not available!");
 		}
 
 		createInfo.enabledLayerCount = static_cast<uint32_t>(m_ValidationLayers.size());
@@ -289,7 +316,7 @@ namespace CHIKU
 
 		if (vkCreateInstance(&createInfo, nullptr, &m_Instance) != VK_SUCCESS)
 		{
-			throw std::runtime_error("failed to create Vulkan instance!");
+			LOG_ERROR("failed to create Vulkan instance!");
 		}
 	}
 
@@ -299,7 +326,7 @@ namespace CHIKU
 
 		if (glfwCreateWindowSurface(m_Instance, m_Window, nullptr, &m_Surface) != VK_SUCCESS)
 		{
-			throw std::runtime_error("failed to create window surface!");
+			LOG_ERROR("failed to create window surface!");
 		}
 	}
 
@@ -312,7 +339,7 @@ namespace CHIKU
 
 		if (deviceCount == 0)
 		{
-			throw std::runtime_error("failed to find GPUs with Vulkan support!");
+			LOG_ERROR("failed to find GPUs with Vulkan support!");
 		}
 
 		std::vector<VkPhysicalDevice> devices(deviceCount);
@@ -330,7 +357,7 @@ namespace CHIKU
 
 		if (m_PhysicalDevice == VK_NULL_HANDLE)
 		{
-			throw std::runtime_error("failed to find a suitable GPU!");
+			LOG_ERROR("failed to find a suitable GPU!");
 		}
 
 		// Use an ordered map to automatically sort candidates by increasing score
@@ -353,7 +380,7 @@ namespace CHIKU
 		}
 		else
 		{
-			throw std::runtime_error("failed to find a suitable GPU!");
+			LOG_ERROR("failed to find a suitable GPU!");
 		}
 	}
 
@@ -396,7 +423,7 @@ namespace CHIKU
 
 		if (CreateDebugUtilsMessengerEXT(m_Instance, &createInfo, nullptr, &m_DebugMessenger) != VK_SUCCESS)
 		{
-			throw std::runtime_error("failed to set up debug messenger!");
+			LOG_ERROR("failed to set up debug messenger!");
 		}
 	}
 
@@ -444,7 +471,7 @@ namespace CHIKU
 
 		if (vkCreateDevice(m_PhysicalDevice, &createInfo, nullptr, &m_LogicalDevice) != VK_SUCCESS)
 		{
-			throw std::runtime_error("failed to create logical device!");
+			LOG_ERROR("failed to create logical device!");
 		}
 
 		vkGetDeviceQueue(m_LogicalDevice, m_QueueFamilyIndices.GraphicsFamily.value(), 0, &m_GraphicsQueue);
@@ -472,7 +499,7 @@ namespace CHIKU
 				vkCreateSemaphore(m_LogicalDevice, &semaphoreInfo, nullptr, &m_RenderFinishedSemaphore[i]) != VK_SUCCESS ||
 				vkCreateFence(m_LogicalDevice, &fenceInfo, nullptr, &m_InFlightFence[i]) != VK_SUCCESS)
 			{
-				throw std::runtime_error("failed to create semaphores!");
+				LOG_ERROR("failed to create semaphores!");
 			}
 		}
 	}

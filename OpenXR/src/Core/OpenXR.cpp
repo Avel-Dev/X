@@ -1,5 +1,6 @@
 #include "OpenXR.h"
 #include "Vulkan/Renderer/VulkanRenderer.h"
+#include "Logging/Logger.h"
 
 namespace OpenXR
 {
@@ -9,13 +10,14 @@ namespace OpenXR
 
 	void OpenXR::Init()
 	{
+		Application::Init();
+		
 		CreateInstance();
 		GetInstanceProperties();
 		CreateDebugMessenger();
 		GetSystemInfo();
+		GetGraphicsInfo();
 		CreateSession();
-
-		Application::Init();
 	}
 
 	void OpenXR::Run()
@@ -45,14 +47,14 @@ namespace OpenXR
 		OPENXR_CHECK(xrEnumerateApiLayerProperties(apiLayerCount, &apiLayerCount, apiLayerProperties.data()), "Failed to enumerate ApiLayerProperties.");
 
 		// Check the requested API layers against the ones from the OpenXR. If found add it to the Active API Layers.
-		for (auto& requestLayer : m_apiLayers)
+		for (auto& requestLayer : m_ApiLayers)
 		{
 			for (auto& layerProperty : apiLayerProperties)
 			{
 				// strcmp returns 0 if the strings match.
 				if (strcmp(requestLayer.c_str(), layerProperty.layerName) == 0)
 				{
-					m_activeAPILayers.push_back(requestLayer.c_str());
+					m_ActiveAPILayers.push_back(requestLayer.c_str());
 					break;
 				}
 			}
@@ -68,7 +70,7 @@ namespace OpenXR
 		// Check the requested Instance Extensions against the ones from the OpenXR runtime.
 		// If an extension is found add it to Active Instance Extensions.
 		// Log error if the Instance Extension is not found.
-		for (auto& requestedInstanceExtension : m_instanceExtensions) {
+		for (auto& requestedInstanceExtension : m_InstanceExtensions) {
 			bool found = false;
 			for (auto& extensionProperty : extensionProperties) {
 				// strcmp returns 0 if the strings match.
@@ -76,7 +78,7 @@ namespace OpenXR
 					continue;
 				}
 				else {
-					m_activeInstanceExtensions.push_back(requestedInstanceExtension.c_str());
+					m_ActiveInstanceExtensions.push_back(requestedInstanceExtension.c_str());
 					found = true;
 					break;
 				}
@@ -89,10 +91,10 @@ namespace OpenXR
 		XrInstanceCreateInfo instanceCI{ XR_TYPE_INSTANCE_CREATE_INFO };
 		instanceCI.createFlags = 0;
 		instanceCI.applicationInfo = AI;
-		instanceCI.enabledApiLayerCount = static_cast<uint32_t>(m_activeAPILayers.size());
-		instanceCI.enabledApiLayerNames = m_activeAPILayers.data();
-		instanceCI.enabledExtensionCount = static_cast<uint32_t>(m_activeInstanceExtensions.size());
-		instanceCI.enabledExtensionNames = m_activeInstanceExtensions.data();
+		instanceCI.enabledApiLayerCount = static_cast<uint32_t>(m_ActiveAPILayers.size());
+		instanceCI.enabledApiLayerNames = m_ActiveAPILayers.data();
+		instanceCI.enabledExtensionCount = static_cast<uint32_t>(m_ActiveInstanceExtensions.size());
+		instanceCI.enabledExtensionNames = m_ActiveInstanceExtensions.data();
 		OPENXR_CHECK(xrCreateInstance(&instanceCI, &m_xrInstance), "Failed to create Instance.");
 	}
 
@@ -109,8 +111,8 @@ namespace OpenXR
 
 	void OpenXR::CreateDebugMessenger()
 	{
-		if (Utils::IsStringInVector(m_activeInstanceExtensions, XR_EXT_DEBUG_UTILS_EXTENSION_NAME)) {
-			m_debugUtilsMessenger = Utils::CreateOpenXRDebugUtilsMessenger(m_xrInstance);  // From OpenXRDebugUtils.h.
+		if (Utils::IsStringInVector(m_ActiveInstanceExtensions, XR_EXT_DEBUG_UTILS_EXTENSION_NAME)) {
+			m_DebugUtilsMessenger = Utils::CreateOpenXRDebugUtilsMessenger(m_xrInstance);  // From OpenXRDebugUtils.h.
 		}
 	}
 
@@ -118,11 +120,31 @@ namespace OpenXR
 	{
 		// Get the XrSystemId from the instance and the supplied XrFormFactor.
 		XrSystemGetInfo systemGI{ XR_TYPE_SYSTEM_GET_INFO };
-		systemGI.formFactor = m_formFactor;
-		OPENXR_CHECK(xrGetSystem(m_xrInstance, &systemGI, &m_systemID), "Failed to get SystemID.");
+		systemGI.formFactor = m_FormFactor;
+		OPENXR_CHECK(xrGetSystem(m_xrInstance, &systemGI, &m_SystemID), "Failed to get SystemID.");
 
 		// Get the System's properties for some general information about the hardware and the vendor.
-		OPENXR_CHECK(xrGetSystemProperties(m_xrInstance, m_systemID, &m_systemProperties), "Failed to get SystemProperties.");
+		OPENXR_CHECK(xrGetSystemProperties(m_xrInstance, m_SystemID, &m_SystemProperties), "Failed to get SystemProperties.");
+	}
+
+	void OpenXR::GetGraphicsInfo()
+	{
+		PFN_xrGetVulkanGraphicsRequirements2KHR pfnGetVulkanGraphicsRequirements2KHR = nullptr;
+		xrGetInstanceProcAddr(
+			m_xrInstance, // your XrInstance
+			"xrGetVulkanGraphicsRequirements2KHR",
+			(PFN_xrVoidFunction*)(&pfnGetVulkanGraphicsRequirements2KHR));
+
+		if (pfnGetVulkanGraphicsRequirements2KHR) {
+			XrResult result = pfnGetVulkanGraphicsRequirements2KHR(m_xrInstance, m_SystemID, &m_GraphicsRequirements);
+			if (XR_FAILED(result)) {
+				LOG_ERROR("" + result);
+			}
+		}
+		else
+		{
+			LOG_ERROR("Method not found : xrGetVulkanGraphicsRequirementsKHR");
+		}
 	}
 
 	void OpenXR::CreateSession()
@@ -139,9 +161,16 @@ namespace OpenXR
 
 		sessionCI.next = &graphicsBinding;
 		sessionCI.createFlags = 0;
-		sessionCI.systemId = m_systemID;
+		sessionCI.systemId = m_SystemID;
 
-		OPENXR_CHECK(xrCreateSession(m_xrInstance, &sessionCI, &m_session), "Failed to create Session.");
+		auto instance = volkGetLoadedInstance();
+
+		if (instance)
+		{
+			LOG_ERROR("FUCK OPENXR !!!!");
+		}
+
+		OPENXR_CHECK(xrCreateSession(m_xrInstance, &sessionCI, &m_Session), "Failed to create Session.");
 	}
 
 	void OpenXR::PollEvents()
@@ -173,7 +202,7 @@ namespace OpenXR
 			case XR_TYPE_EVENT_DATA_INTERACTION_PROFILE_CHANGED: {
 				XrEventDataInteractionProfileChanged* interactionProfileChanged = reinterpret_cast<XrEventDataInteractionProfileChanged*>(&eventData);
 				std::cout << "OPENXR: Interaction Profile changed for Session: " << interactionProfileChanged->session;
-				if (interactionProfileChanged->session != m_session) {
+				if (interactionProfileChanged->session != m_Session) {
 					std::cout << "XrEventDataInteractionProfileChanged for unknown Session";
 					break;
 				}
@@ -183,7 +212,7 @@ namespace OpenXR
 			case XR_TYPE_EVENT_DATA_REFERENCE_SPACE_CHANGE_PENDING: {
 				XrEventDataReferenceSpaceChangePending* referenceSpaceChangePending = reinterpret_cast<XrEventDataReferenceSpaceChangePending*>(&eventData);
 				std::cout << "OPENXR: Reference Space Change pending for Session: " << referenceSpaceChangePending->session;
-				if (referenceSpaceChangePending->session != m_session) {
+				if (referenceSpaceChangePending->session != m_Session) {
 					std::cout << "XrEventDataReferenceSpaceChangePending for unknown Session";
 					break;
 				}
@@ -192,7 +221,7 @@ namespace OpenXR
 																  // Session State changes:
 			case XR_TYPE_EVENT_DATA_SESSION_STATE_CHANGED: {
 				XrEventDataSessionStateChanged* sessionStateChanged = reinterpret_cast<XrEventDataSessionStateChanged*>(&eventData);
-				if (sessionStateChanged->session != m_session) {
+				if (sessionStateChanged->session != m_Session) {
 					std::cout << "XrEventDataSessionStateChanged for unknown Session";
 					break;
 				}
@@ -201,12 +230,12 @@ namespace OpenXR
 					// SessionState is ready. Begin the XrSession using the XrViewConfigurationType.
 					XrSessionBeginInfo sessionBeginInfo{ XR_TYPE_SESSION_BEGIN_INFO };
 					sessionBeginInfo.primaryViewConfigurationType = XR_VIEW_CONFIGURATION_TYPE_PRIMARY_STEREO;
-					OPENXR_CHECK(xrBeginSession(m_session, &sessionBeginInfo), "Failed to begin Session.");
+					OPENXR_CHECK(xrBeginSession(m_Session, &sessionBeginInfo), "Failed to begin Session.");
 					m_sessionRunning = true;
 				}
 				if (sessionStateChanged->state == XR_SESSION_STATE_STOPPING) {
 					// SessionState is stopping. End the XrSession.
-					OPENXR_CHECK(xrEndSession(m_session), "Failed to end Session.");
+					OPENXR_CHECK(xrEndSession(m_Session), "Failed to end Session.");
 					m_sessionRunning = false;
 				}
 				if (sessionStateChanged->state == XR_SESSION_STATE_EXITING) {
@@ -221,7 +250,7 @@ namespace OpenXR
 					m_applicationRunning = false;
 				}
 				// Store state for reference across the application.
-				m_sessionState = sessionStateChanged->state;
+				m_SessionState = sessionStateChanged->state;
 				break;
 			}
 			default: {
@@ -242,7 +271,7 @@ namespace OpenXR
 
 	void OpenXR::DestroySession()
 	{
-		OPENXR_CHECK(xrDestroySession(m_session), "Failed to destroy Session.");
+		OPENXR_CHECK(xrDestroySession(m_Session), "Failed to destroy Session.");
 	}
 
 	void OpenXR::DestroyInstance()
@@ -253,8 +282,8 @@ namespace OpenXR
 	void OpenXR::DestroyDebugMessenger()
 	{
 		// Check that "XR_EXT_debug_utils" is in the active Instance Extensions before destroying the XrDebugUtilsMessengerEXT.
-		if (m_debugUtilsMessenger != XR_NULL_HANDLE) {
-			Utils::DestroyOpenXRDebugUtilsMessenger(m_xrInstance, m_debugUtilsMessenger);  // From OpenXRDebugUtils.h.
+		if (m_DebugUtilsMessenger != XR_NULL_HANDLE) {
+			Utils::DestroyOpenXRDebugUtilsMessenger(m_xrInstance, m_DebugUtilsMessenger);  // From OpenXRDebugUtils.h.
 		}
 	}
 

@@ -10,11 +10,13 @@
 #endif
 
 #define RENDERER_VULKAN
+#define ENABLE_VALIDATION_LAYERS
 #define CHIKU_ENABLE_LOGGING
 
 #ifdef RENDERER_VULKAN
-#define GLFW_INCLUDE_VULKAN
-#endif // 
+#include "volk.h"
+//#define GLFW_INCLUDE_VULKAN
+#endif // RENDERER_VULKAN
 
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
@@ -22,7 +24,7 @@
 #define SOURCE_DIR std::string(CHIKU_SRC_PATH)
 #define ASSET_REGISTRY SOURCE_DIR + std::string(STR(AssetRegistry.json)) 
 
-#define ENABLE_VALIDATION_LAYERS
+//#define ENABLE_VALIDATION_LAYERS
 #define DEFAULT_DESCRIPTOR_SET_LAYOUT_BINDING_COUNT 1
 
 #define MAX_UNIFORM_BUFFER_BINDINGS 20

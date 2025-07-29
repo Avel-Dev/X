@@ -13,6 +13,7 @@ option(TRACY_ENABLE "Enable Tracy profiler" ON)
 option(TRACY_ON_DEMAND "Enable Tracy on-demand mode" ON)
 
 # Add dependencies
+add_subdirectory("vendor/volk")
 add_subdirectory("vendor/glfw")
 add_subdirectory("vendor/glm")
 add_subdirectory("vendor/tracy")
@@ -28,13 +29,17 @@ set(SRC_SOURCES ${SRC_SOURCES} "vendor/spirv_reflect/spirv_reflect.cpp")
 add_library(VulkanEngine STATIC ${SRC_SOURCES})
 
 # Link directories
-target_link_directories(VulkanEngine PUBLIC $ENV{VULKAN_SDK}/lib)
+target_link_libraries(VulkanEngine PRIVATE volk)
 
 if(WIN32)
+set(VOLK_STATIC_DEFINES VK_USE_PLATFORM_WIN32_KHR)
+
 target_compile_options ( VulkanEngine     
 PUBLIC
 "/utf-8")
 endif()
+
+target_link_directories(VulkanEngine PUBLIC $ENV{VULKAN_SDK}/lib)
 
 # Include directories
 target_include_directories( VulkanEngine
@@ -51,10 +56,11 @@ PUBLIC
     vendor/spirv_reflect
     vendor/tracy/public
     vendor/yaml-cpp/include
+    vendor/volk
     $ENV{VULKAN_SDK}/include
 )
 # Set macro for source path
-target_compile_definitions(VulkanEngine PRIVATE CHIKU_SRC_PATH="${CMAKE_CURRENT_SOURCE_DIR}/")
+target_compile_definitions(VulkanEngine PRIVATE CHIKU_SRC_PATH="${CMAKE_CURRENT_SOURCE_DIR}/" VOLK_STATIC_DEFINE)
 
 # Platform definitions
 if(WIN32)

@@ -6,17 +6,63 @@ namespace OpenXR
 {
 	OpenXR::OpenXR() : CHIKU::Application()
 	{
+		CreateInstance();
+		GetInstanceProperties();
+		GetSystemInfo();
+		CreateDebugMessenger();
+		LoadPFN_XrFunctions(m_xrInstance);
+
+		uint32_t physicalDeviceCount = 0;
+		std::vector<VkPhysicalDevice> physicalDevices;
+		vkEnumeratePhysicalDevices(CHIKU::VulkanRenderer::GetVulkanInstance(), &physicalDeviceCount, nullptr);
+		physicalDevices.resize(physicalDeviceCount);
+		vkEnumeratePhysicalDevices(CHIKU::VulkanRenderer::GetVulkanInstance(), &physicalDeviceCount, physicalDevices.data());
+
+		VkPhysicalDevice physicalDeviceFromXR;
+		xrGetVulkanGraphicsDeviceKHR(m_xrInstance, m_SystemID, CHIKU::VulkanRenderer::GetVulkanInstance(), &physicalDeviceFromXR);
+
+		VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
+
+		auto physicalDeviceFromXR_it = std::find(physicalDevices.begin(), physicalDevices.end(), physicalDeviceFromXR);
+		if (physicalDeviceFromXR_it != physicalDevices.end()) {
+			physicalDevice = *physicalDeviceFromXR_it;
+		}
+		else {
+			std::cout << "ERROR: Vulkan: Failed to find PhysicalDevice for OpenXR." << std::endl;
+			// Select the first available device.
+			physicalDevice = physicalDevices[0];
+		}
+
+		// Device
+		std::vector<VkQueueFamilyProperties> queueFamilyProperties;
+		uint32_t queueFamilyPropertiesCount = 0;
+		vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyPropertiesCount, nullptr);
+		queueFamilyProperties.resize(queueFamilyPropertiesCount);
+		vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyPropertiesCount, queueFamilyProperties.data());
+
+
+
+		XrGraphicsRequirementsVulkanKHR graphicsRequirements{ XR_TYPE_GRAPHICS_REQUIREMENTS_VULKAN_KHR };
+		xrGetVulkanGraphicsRequirementsKHR(m_xrInstance, m_SystemID, &graphicsRequirements);
+
+		m_RendererExtensions = GetInstanceExtensionsForOpenXR();
+
+		std::vector<const char*> rendererExtensions;
+
+		for(const auto& ext : m_RendererExtensions)
+		{
+			rendererExtensions.push_back(ext.c_str());
+		}
+
+		CHIKU::Renderer::AddExtions(rendererExtensions.data(),rendererExtensions.size());
+
+		GetGraphicsInfo();
 	}
 
 	void OpenXR::Init()
 	{
 		Application::Init();
-		
-		CreateInstance();
-		GetInstanceProperties();
-		CreateDebugMessenger();
-		GetSystemInfo();
-		GetGraphicsInfo();
+	
 		CreateSession();
 	}
 
@@ -28,6 +74,34 @@ namespace OpenXR
 	void OpenXR::Render()
 	{
 		Application::Render();
+	}
+
+	void OpenXR::LoadPFN_XrFunctions(XrInstance m_xrInstance)
+	{
+		OPENXR_CHECK(xrGetInstanceProcAddr(m_xrInstance, "xrGetVulkanGraphicsRequirementsKHR", (PFN_xrVoidFunction*)&xrGetVulkanGraphicsRequirementsKHR), "Failed to get InstanceProcAddr for xrGetVulkanGraphicsRequirementsKHR.");
+		OPENXR_CHECK(xrGetInstanceProcAddr(m_xrInstance, "xrGetVulkanInstanceExtensionsKHR", (PFN_xrVoidFunction*)&xrGetVulkanInstanceExtensionsKHR), "Failed to get InstanceProcAddr for xrGetVulkanInstanceExtensionsKHR.");
+		OPENXR_CHECK(xrGetInstanceProcAddr(m_xrInstance, "xrGetVulkanDeviceExtensionsKHR", (PFN_xrVoidFunction*)&xrGetVulkanDeviceExtensionsKHR), "Failed to get InstanceProcAddr for xrGetVulkanDeviceExtensionsKHR.");
+		OPENXR_CHECK(xrGetInstanceProcAddr(m_xrInstance, "xrGetVulkanGraphicsDeviceKHR", (PFN_xrVoidFunction*)&xrGetVulkanGraphicsDeviceKHR), "Failed to get InstanceProcAddr for xrGetVulkanGraphicsDeviceKHR.");
+	}
+
+	std::vector<std::string> OpenXR::GetInstanceExtensionsForOpenXR()
+	{
+		uint32_t extensionNamesSize = 0;
+		OPENXR_CHECK(xrGetVulkanInstanceExtensionsKHR(m_xrInstance, m_SystemID, 0, &extensionNamesSize, nullptr), "Failed to get Vulkan Instance Extensions.");
+
+		std::vector<char> extensionNames(extensionNamesSize);
+		OPENXR_CHECK(xrGetVulkanInstanceExtensionsKHR(m_xrInstance, m_SystemID, extensionNamesSize, &extensionNamesSize, extensionNames.data()), "Failed to get Vulkan Instance Extensions.");
+
+		std::stringstream streamData(extensionNames.data());
+		std::vector<std::string> extensions;
+		std::string extension;
+
+		while (std::getline(streamData, extension, ' ')) 
+		{
+			extensions.push_back(extension);
+		}
+
+		return extensions;
 	}
 
 	void OpenXR::CreateInstance()
@@ -163,14 +237,10 @@ namespace OpenXR
 		sessionCI.createFlags = 0;
 		sessionCI.systemId = m_SystemID;
 
-		auto instance = volkGetLoadedInstance();
+		XrResult result = xrCreateSession(m_xrInstance, &sessionCI, &m_Session);
+		
+		OPENXR_CHECK(result, "Failed to create Session.");
 
-		if (instance)
-		{
-			LOG_ERROR("FUCK OPENXR !!!!");
-		}
-
-		OPENXR_CHECK(xrCreateSession(m_xrInstance, &sessionCI, &m_Session), "Failed to create Session.");
 	}
 
 	void OpenXR::PollEvents()

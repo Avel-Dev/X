@@ -23,6 +23,7 @@ namespace CHIKU
 		static void* GetPhysicalDevice() { return s_Instance->mGetPhysicalDevice(); }
 		static void* GetInstance() { return s_Instance->mGetInstance(); }
 
+		static void AddExtions(const char** extensions, uint32_t count) { s_Instance->InsertExtension(extensions,count); }
 
 		static void* BeginSingleTimeCommands() { return s_Instance->mBeginSingleTimeCommands(); }
 		static void EndSingleTimeCommands(void* cmdBuffer) { return s_Instance->mEndSingleTimeCommands(cmdBuffer); }
@@ -30,6 +31,8 @@ namespace CHIKU
 		static std::unique_ptr<Renderer> Create();
 
 	protected:
+		void InsertExtension(const char** extensions, uint32_t count);
+
 		virtual void mInit(GLFWwindow* window) = 0;
 		virtual void mCleanUp() = 0;
 		virtual void mWait() = 0;
@@ -51,5 +54,7 @@ namespace CHIKU
 	protected:
 		static std::unique_ptr<Renderer> s_Instance;
 		GLFWwindow* m_Window = nullptr;
+
+		std::vector<const char*> m_Extension;
 	};
 }

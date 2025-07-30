@@ -1,4 +1,5 @@
 #pragma once
+#ifdef  CHIKU_ENABLE_LOGGING
 
 #include "EngineHeader.h"
 #include <spdlog/spdlog.h>
@@ -15,39 +16,15 @@ namespace CHIKU
                 s_Logger->set_level(spdlog::level::trace); // change to info/debug if needed
             }
         }
-
-        template<typename... Args>
-        inline static void Trace(Args&&... args) {
-            s_Logger->trace(std::forward<Args>(args)...);
+        static void Shutdown()
+        {
+            spdlog::shutdown();
         }
 
-        template<typename... Args>
-        inline static void Debug(Args&&... args) {
-            s_Logger->debug(std::forward<Args>(args)...);
-        }
-
-        template<typename... Args>
-        inline static void Info(Args&&... args) {
-            s_Logger->info(std::forward<Args>(args)...);
-        }
-
-        template<typename... Args>
-        inline static void Warn(Args&&... args) {
-            s_Logger->warn(std::forward<Args>(args)...);
-        }
-
-        template<typename... Args>
-        inline static void Error(Args&&... args) {
-            s_Logger->error(std::forward<Args>(args)...);
-        }
-
-        template<typename... Args>
-        inline static void Critical(Args&&... args) {
-            s_Logger->critical(std::forward<Args>(args)...);
-        }
+        static SHARED<spdlog::logger>& Get() { return s_Logger; }
 
     private:
-        static std::shared_ptr<spdlog::logger> s_Logger;
+        static SHARED<spdlog::logger> s_Logger;
     };
 }
 
@@ -65,15 +42,14 @@ namespace CHIKU
         std::exit(EXIT_FAILURE);                                  \
     }
 
-#ifdef CHIKU_ENABLE_LOGGING
-#define LOG_TRACE(...)    CHIKU::Logger::Trace(__VA_ARGS__)
-#define LOG_DEBUG(...)    CHIKU::Logger::Debug(__VA_ARGS__)
-#define LOG_INFO(...)     CHIKU::Logger::Info(__VA_ARGS__)
-#define LOG_WARN(...)     CHIKU::Logger::Warn(__VA_ARGS__)
-#define LOG_ERROR(...)    CHIKU::Logger::Error(__VA_ARGS__); \
+#define LOG_TRACE(...)    CHIKU::Logger::Get()->trace(__VA_ARGS__)
+#define LOG_DEBUG(...)    CHIKU::Logger::Get()->debug(__VA_ARGS__)
+#define LOG_INFO(...)     CHIKU::Logger::Get()->info(__VA_ARGS__)
+#define LOG_WARN(...)     CHIKU::Logger::Get()->warn(__VA_ARGS__)
+#define LOG_ERROR(...)    CHIKU::Logger::Get()->error(__VA_ARGS__); \
 DEBUG_BREAK
 
-#define LOG_CRITICAL(...) CHIKU::Logger::Critical(__VA_ARGS__); \
+#define LOG_CRITICAL(...) CHIKU::Logger::Get()->critical(__VA_ARGS__); \
 DEBUG_BREAK
 
 #else

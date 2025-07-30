@@ -10,6 +10,11 @@ namespace CHIKU
 
 	Application::Application()
 	{
+	}
+
+	void Application::Init()
+	{
+		ZoneScoped;    // Profile this block
 		m_Window.SetTitle("Chiku Editor");
 		m_Window.SetSize(1280, 720);
 		m_Window.Create();
@@ -23,21 +28,15 @@ namespace CHIKU
 		GraphicsPipeline::Init();
 
 		s_Data.eventHandler = [this](Event& event) -> void
-		{
-			Publish(event);
-		};
+			{
+				Publish(event);
+			};
 
 		AssetManager::AddShader({ "src/Shaders/Unlit/unlit.vert", "src/Shaders/Unlit/unlit.frag" });
 		AssetManager::AddShader({ "src/Shaders/Defaultlit/defaultlit.vert", "src/Shaders/Defaultlit/defaultlit.frag" });
 
-		auto assetHandle = AssetManager::AddModel({ "Models/Y Bot/Y Bot.gltf"});
+		auto assetHandle = AssetManager::AddModel({ "Models/Y Bot/Y Bot.gltf" });
 		m_Model = std::dynamic_pointer_cast<ModelAsset>(AssetManager::GetAsset(assetHandle));
-
-	}
-
-	void Application::Init()
-	{
-		ZoneScoped;    // Profile this block
 	}
 
 	void Application::Run()
@@ -77,5 +76,8 @@ namespace CHIKU
 		AssetManager::CleanUp();
 		GraphicsPipeline::s_Instance->CleanUp();
 		Renderer::CleanUp();
+#ifdef CHIKU_ENABLE_LOGGING
+		Logger::Shutdown();
+#endif
 	}
 }

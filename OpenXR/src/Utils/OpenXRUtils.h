@@ -1,5 +1,6 @@
 #pragma once
-#include <OpenXR/openxr.h>
+#include "OpenXRHeader.h"
+#include "OpenXRUtils.h"
 #include <vector>
 
 namespace Utils

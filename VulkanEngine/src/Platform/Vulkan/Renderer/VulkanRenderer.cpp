@@ -40,23 +40,13 @@ namespace CHIKU
 			LOG_ERROR("GLFWwindow is required for Vulkan Engine");
 		}
 
-		volkInitialize();               // Optional (loads global Vulkan functions)
 		GetRequiredExtensions();
 		CreateInstance();
-		volkLoadInstance(m_Instance);  // Required by Meta XR Simulator
 		CreateSurface();
 		CreatePhysicalDevice();
 		CreateLogicalDevice();
-		volkLoadDevice(m_LogicalDevice);
 		CreateSyncObjects();
 		DescriptorPool::Init();
-
-		auto instance = volkGetLoadedInstance();
-
-		if (instance == m_Instance)
-		{
-			LOG_INFO("volk get right");
-		}
 
 		m_Commands.Init(m_GraphicsQueue, m_LogicalDevice, m_PhysicalDevice, m_Surface);
 		m_Swapchain.Init(m_Window, m_PhysicalDevice, m_LogicalDevice, m_Surface);
@@ -200,11 +190,12 @@ namespace CHIKU
 
 		uint32_t glfwExtensionCount = 0;
 		const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
-
-		m_Extension.insert(m_Extension.end(), glfwExtensions, glfwExtensions + glfwExtensionCount);
-
+		
+		InsertExtension(glfwExtensions, glfwExtensionCount);
+		
 #ifdef ENABLE_VALIDATION_LAYERS
-		m_Extension.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+		auto ext = VK_EXT_DEBUG_UTILS_EXTENSION_NAME;
+		InsertExtension(&ext, 1);
 #endif
 	}
 
@@ -294,6 +285,8 @@ namespace CHIKU
 
 		VkInstanceCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+		createInfo.pNext = nullptr;
+		createInfo.flags = 0;
 		createInfo.pApplicationInfo = &appInfo;
 		createInfo.enabledExtensionCount = static_cast<uint32_t>(m_Extension.size());
 		createInfo.ppEnabledExtensionNames = m_Extension.data();

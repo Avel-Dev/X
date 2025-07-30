@@ -1,11 +1,8 @@
 #pragma once
 
+#include "OpenXRHeader.h"
 #include "Application.h"
 #include "Utils/OpenXRUtils.h"
-
-#define XR_USE_GRAPHICS_API_VULKAN
-#include <openxr/openxr.h>
-#include <openxr/openxr_platform.h>
 
 namespace OpenXR
 {
@@ -19,6 +16,10 @@ namespace OpenXR
 		void CleanUp() override;
 
 	private:
+		// XR_DOCS_TAG_BEGIN_GraphicsAPI_Vulkan_LoadPFN_XrFunctions
+		void LoadPFN_XrFunctions(XrInstance m_xrInstance);
+		std::vector<std::string> GetInstanceExtensionsForOpenXR();
+
 		void CreateInstance();
 		void GetInstanceProperties();
 		void CreateDebugMessenger();
@@ -47,6 +48,13 @@ namespace OpenXR
 		std::vector<const char*> m_ActiveAPILayers = {};
 		std::vector<const char*> m_ActiveInstanceExtensions = {};
 		std::vector<std::string> m_ApiLayers = {};
-		std::vector<std::string> m_InstanceExtensions = { XR_EXT_DEBUG_UTILS_EXTENSION_NAME, XR_KHR_VULKAN_ENABLE2_EXTENSION_NAME };
+		std::vector<std::string> m_InstanceExtensions = { XR_EXT_DEBUG_UTILS_EXTENSION_NAME, XR_KHR_VULKAN_ENABLE_EXTENSION_NAME };
+
+		PFN_xrGetVulkanGraphicsRequirementsKHR xrGetVulkanGraphicsRequirementsKHR;
+		PFN_xrGetVulkanInstanceExtensionsKHR xrGetVulkanInstanceExtensionsKHR;
+		PFN_xrGetVulkanDeviceExtensionsKHR xrGetVulkanDeviceExtensionsKHR;
+		PFN_xrGetVulkanGraphicsDeviceKHR xrGetVulkanGraphicsDeviceKHR;
+
+		std::vector<std::string> m_RendererExtensions = {};
 	};
 }

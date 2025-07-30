@@ -1,8 +1,8 @@
+#include "EngineHeader.h"
 #include "Renderer/Renderer.h"
 #include "Vulkan/Renderer/Swapchain.h"
 #include "Vulkan/Renderer/Commands.h"
 #include "Vulkan/Utils/VulkanRendererUtility.h"
-#include "volk.h"
 
 namespace CHIKU
 {
@@ -25,6 +25,7 @@ namespace CHIKU
 		void mInit(GLFWwindow* window) override;
 		void mCleanUp() override;
 		void mWait() override;
+
  
 		static uint32_t GetGraphicsQueueFamilyIndex() { return m_QueueFamilyIndices.GraphicsFamily.value(); }
 		static uint32_t GetPresentQueueFamilyIndex() { return m_QueueFamilyIndices.PresentFamily.value(); }
@@ -112,10 +113,7 @@ namespace CHIKU
 			VK_KHR_SWAPCHAIN_EXTENSION_NAME
 		};
 
-		std::vector<const char*> m_Extension;
-
 		VkPipelineLayout m_PipelineLayout;
 		VkPipeline m_GraphicsPipeline;
-
 	};
 }

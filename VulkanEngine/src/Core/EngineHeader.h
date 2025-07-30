@@ -11,11 +11,9 @@
 
 #define RENDERER_VULKAN
 #define ENABLE_VALIDATION_LAYERS
-#define CHIKU_ENABLE_LOGGING
 
 #ifdef RENDERER_VULKAN
-#include "volk.h"
-//#define GLFW_INCLUDE_VULKAN
+#define GLFW_INCLUDE_VULKAN
 #endif // RENDERER_VULKAN
 
 #include <GLFW/glfw3.h>

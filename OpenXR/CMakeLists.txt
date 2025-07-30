@@ -28,11 +28,11 @@ FetchContent_MakeAvailable(OpenXR)
 set(BUILD_API_LAYERS ON CACHE BOOL "" FORCE)
 set(BUILD_TESTS OFF CACHE BOOL "" FORCE)
 
-file(GLOB_RECURSE GAME_SOURCES "src/*.cpp")
+file(GLOB_RECURSE OPENXR_SOURCES "src/**/*.cpp")
+file(GLOB_RECURSE OPENXR_HEADERS "src/**/*.h")
 
-include_directories("src")
 
-add_executable(OpenXR ${GAME_SOURCES})
+add_executable(OpenXR ${OPENXR_SOURCES} ${OPENXR_HEADERS})
 
 if(NOT "${XR_RUNTIME_JSON}" STREQUAL "")
     set_target_properties(
@@ -44,6 +44,7 @@ endif()
 target_include_directories(
     ${PROJECT_NAME}
     PRIVATE
+        "src"
         "${openxr_SOURCE_DIR}/src/common"
         "${openxr_SOURCE_DIR}/external/include"
 )
@@ -53,3 +54,5 @@ PRIVATE
     VulkanEngine
     openxr_loader
 )
+
+target_compile_definitions(OpenXR PRIVATE REQUIRED_VR)

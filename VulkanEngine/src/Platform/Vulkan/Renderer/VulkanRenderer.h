@@ -4,6 +4,7 @@
 #include "Vulkan/Renderer/Swapchain.h"
 #include "Vulkan/Renderer/Commands.h"
 #include "Vulkan/Utils/VulkanRendererUtility.h"
+#include "OpenXR.h"
 
 namespace CHIKU
 {
@@ -26,7 +27,7 @@ namespace CHIKU
 		void mInit(RendererData* data) override;
 		void mCleanUp() override;
 		void mWait() override;
- 
+
 		static uint32_t GetGraphicsQueueFamilyIndex() { return m_QueueFamilyIndices.GraphicsFamily.value(); }
 		static uint32_t GetPresentQueueFamilyIndex() { return m_QueueFamilyIndices.PresentFamily.value(); }
 		static VkInstance GetVulkanInstance() { return (VkInstance)s_Instance->GetInstance(); }	
@@ -40,6 +41,7 @@ namespace CHIKU
 		static const inline void EndRecordingSingleTimeCommands(VkCommandBuffer commandBuffer) noexcept { return s_Instance->EndSingleTimeCommands(commandBuffer); }
 
 	private:
+		virtual void* mGetGraphicsBinding() override { return &m_GraphicsBinding; }
 		virtual void* mGetInstance() override { return m_Instance; }
 		virtual void* mGetRenderPass() override { return m_Swapchain.GetRenderPass(); }
 		virtual void* mGetCommandBuffer() override { return m_Commands.GetCommandBuffer(m_CurrentFrame); }
@@ -116,5 +118,11 @@ namespace CHIKU
 
 		VkPipelineLayout m_PipelineLayout;
 		VkPipeline m_GraphicsPipeline;
+
+		PFN_xrGetVulkanGraphicsRequirementsKHR xrGetVulkanGraphicsRequirementsKHR;
+		PFN_xrGetVulkanInstanceExtensionsKHR xrGetVulkanInstanceExtensionsKHR;
+		PFN_xrGetVulkanDeviceExtensionsKHR xrGetVulkanDeviceExtensionsKHR;
+		PFN_xrGetVulkanGraphicsDeviceKHR xrGetVulkanGraphicsDeviceKHR;
+		XrGraphicsBindingVulkanKHR m_GraphicsBinding;
 	};
 }

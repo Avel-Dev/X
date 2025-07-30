@@ -1,9 +1,9 @@
 #include "VulkanRenderer.h"
 #include "DescriptorPool.h"
-#include "Vulkan/Buffer/VulkanUniformBuffer.h"
-#include "Vulkan/Buffer/VulkanVertexBuffer.h"
-#include "Vulkan/Buffer/VulkanIndexBuffer.h"
-
+#include <Vulkan/Buffer/VulkanUniformBuffer.h>
+#include <Vulkan/Buffer/VulkanVertexBuffer.h>
+#include <Vulkan/Buffer/VulkanIndexBuffer.h>
+#include <Vulkan/Utils/OpenXRUtils/OpenXRUtils.h>
 #include <iostream>
 #include <cstring>
 
@@ -16,7 +16,7 @@ namespace CHIKU
 	{
 		ZoneScoped;
 		m_Window = nullptr;
-		
+
 		m_Instance = VK_NULL_HANDLE;
 		m_Surface = VK_NULL_HANDLE;
 		m_PhysicalDevice = VK_NULL_HANDLE;
@@ -27,6 +27,7 @@ namespace CHIKU
 		m_LogicalDevice = VK_NULL_HANDLE;
 		m_GraphicsQueue = VK_NULL_HANDLE;
 		m_PresentQueue = VK_NULL_HANDLE;
+
 	}
 
 	void VulkanRenderer::mInit(RendererData* data)
@@ -49,6 +50,14 @@ namespace CHIKU
 
 		m_Commands.Init(m_GraphicsQueue, m_LogicalDevice, m_PhysicalDevice, m_Surface);
 		m_Swapchain.Init(m_Window, m_PhysicalDevice, m_LogicalDevice, m_Surface);
+
+		m_GraphicsBinding = { XR_TYPE_GRAPHICS_BINDING_VULKAN_KHR };
+		m_GraphicsBinding.instance = m_Instance;
+		m_GraphicsBinding.physicalDevice = m_PhysicalDevice;
+		m_GraphicsBinding.device = m_LogicalDevice;
+		m_GraphicsBinding.queueFamilyIndex = m_QueueFamilyIndices.GraphicsFamily.value();
+		m_GraphicsBinding.queueIndex = 0;
+
 	}
 
 	void VulkanRenderer::mCleanUp()
@@ -280,7 +289,19 @@ namespace CHIKU
 		appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
 		appInfo.pEngineName = "CHIKU";
 		appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-		appInfo.apiVersion = VK_API_VERSION_1_0;
+		appInfo.apiVersion = OpenXR::GetAPIVersion();
+
+		auto OpenXRExtensions = OpenXR::GetVulkanRequiredExtensions();
+
+		std::vector<const char*> cstrVec;
+
+		cstrVec.reserve(OpenXRExtensions.size()); // optional but avoids reallocations
+		for (const std::string& s : OpenXRExtensions)
+		{
+			cstrVec.push_back(s.c_str());
+		}
+
+		InsertExtension(cstrVec.data(),cstrVec.size());
 
 		VkInstanceCreateInfo createInfo{};
 		createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;

@@ -34,6 +34,7 @@ namespace CHIKU
 		static void EndFrame() { s_Instance->mEndFrame(); }
 		static void RecreateSwapChain() { s_Instance->mRecreateSwapChain(); }
 
+		static void* GetGraphicsBinding() { return s_Instance->mGetGraphicsBinding(); }
 		static void* GetRenderPass() { return s_Instance->mGetRenderPass(); }
 		static void* GetCommandBuffer() { return s_Instance->mGetCommandBuffer(); }
 		static void* GetDevice() { return s_Instance->mGetDevice(); }
@@ -57,6 +58,7 @@ namespace CHIKU
 
 		virtual void mRecreateSwapChain() = 0;
 
+		virtual void* mGetGraphicsBinding() = 0;
 		virtual void* mGetInstance() = 0;
 		virtual void* mGetRenderPass() = 0;
 		virtual void* mGetCommandBuffer() = 0;

@@ -1,7 +1,8 @@
 #include "Application.h"
-#include "Vulkan/Utils/VulkanShaderUtils.h"
-#include "Assets/AssetManager.h"
-#include "Renderer/GraphicsPipeline.h"
+#include <Vulkan/Utils/VulkanShaderUtils.h>
+#include <Assets/AssetManager.h>
+#include <Renderer/GraphicsPipeline.h>
+#include <Vulkan/Renderer/OpenXR.h>
 
 namespace CHIKU
 {
@@ -27,6 +28,7 @@ namespace CHIKU
 		rendererData.type = VULKAN_RENDERER; // or OPENXR_RENDERER for OpenXR
 		rendererData.window = m_Window.GetWindow();
 
+		OpenXR::Init();
 		Renderer::Init(&rendererData);
 		AssetManager::Init();
 		GraphicsPipeline::Init();
@@ -57,6 +59,9 @@ namespace CHIKU
 	void Application::Render()
 	{
 		ZoneScoped;
+
+		OpenXR::Run();
+
 		while (!m_Window.WindowShouldClose())
 		{
 			FrameMark;
@@ -77,6 +82,7 @@ namespace CHIKU
 		ZoneScoped;
 
 		Renderer::Wait();
+		OpenXR::CleanUp();
 		AssetManager::CleanUp();
 		GraphicsPipeline::s_Instance->CleanUp();
 		Renderer::CleanUp();

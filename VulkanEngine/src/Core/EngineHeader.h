@@ -1,6 +1,4 @@
 #pragma once
-
-
 #ifdef PLT_WINDOWS
 #define VK_USE_PLATFORM_WIN32_KHR
 #define GLFW_EXPOSE_NATIVE_WIN32 
@@ -9,13 +7,10 @@
 #define GLFW_EXPOSE_NATIVE_WAYLAND
 #endif
 
-#define RENDERER_VULKAN
 #define ENABLE_VALIDATION_LAYERS
 
-#ifdef RENDERER_VULKAN
+//#define REQUIRED_OPENXR_VULKAN 1
 #define GLFW_INCLUDE_VULKAN
-#endif // RENDERER_VULKAN
-
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 

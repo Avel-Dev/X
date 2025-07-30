@@ -1,5 +1,37 @@
 ﻿cmake_minimum_required(VERSION 3.12)
 project(VulkanEngine)
+add_definitions(-DREQUIRED_VR_VULKAN)
+
+# For FetchContent_Declare() and FetchContent_MakeAvailable()
+include(FetchContent)
+
+# openxr_loader - From github.com/KhronosGroup
+set(BUILD_API_LAYERS
+        ON
+        CACHE INTERNAL "Use OpenXR layers"
+)
+set(BUILD_TESTS
+        OFF
+        CACHE INTERNAL "Build tests"
+)
+FetchContent_Declare(
+    OpenXR
+    EXCLUDE_FROM_ALL
+    DOWNLOAD_EXTRACT_TIMESTAMP
+    URL_HASH MD5=f52248ef83da9134bec2b2d8e0970677
+    URL https://github.com/KhronosGroup/OpenXR-SDK-Source/archive/refs/tags/release-1.1.49.tar.gz
+    SOURCE_DIR
+    openxr
+)
+
+FetchContent_MakeAvailable(OpenXR)
+
+if(NOT "${XR_RUNTIME_JSON}" STREQUAL "")
+    set_target_properties(
+        ${PROJECT_NAME} PROPERTIES VS_DEBUGGER_ENVIRONMENT
+                                   "XR_RUNTIME_JSON=${XR_RUNTIME_JSON}"
+    )
+endif()
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -52,11 +84,17 @@ PUBLIC
     vendor/tracy/public
     vendor/yaml-cpp/include
     $ENV{VULKAN_SDK}/include
+    "${openxr_SOURCE_DIR}/src/common"
+    "${openxr_SOURCE_DIR}/external/include"
+
 )
 # Set macro for source path
-target_compile_definitions(VulkanEngine PRIVATE CHIKU_SRC_PATH="${CMAKE_CURRENT_SOURCE_DIR}/"  CHIKU_ENABLE_LOGGING)
+target_compile_definitions(VulkanEngine 
+PRIVATE 
+    CHIKU_SRC_PATH="${CMAKE_CURRENT_SOURCE_DIR}/"  
+    CHIKU_ENABLE_LOGGING
+)
 
-# Platform definitions
 if(WIN32)
     set(VULKAN_LIB vulkan-1)
     target_compile_definitions(VulkanEngine PRIVATE PLT_WINDOWS)
@@ -80,6 +118,7 @@ target_link_libraries(VulkanEngine
         yaml-cpp
         tinygltf
         ${VULKAN_LIB}
+        openxr_loader
 )
 
 # Exception handling (for MSVC)

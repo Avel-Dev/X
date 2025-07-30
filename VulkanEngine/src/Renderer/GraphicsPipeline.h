@@ -2,9 +2,6 @@
 #include "Assets/MaterialAsset.h"
 #include "Assets/MeshAsset.h"
 #include "Renderer/Buffer/VertexBuffer.h"
-#ifdef RENDERER_VULKAN
-	#include "Vulkan/Renderer/VulkanGraphicsPipelineData.h"
-#endif
 
 namespace CHIKU
 {
@@ -37,6 +34,8 @@ namespace std {
 
 namespace CHIKU
 {
+	struct PipelineData;
+
 	class GraphicsPipeline
 	{
 	public:
@@ -49,25 +48,16 @@ namespace CHIKU
 		static void CleanUp() { s_Instance->mCleanUp(); }
 
 		static PipelineData GetPipeline(
-			const std::shared_ptr<MaterialAsset>& materialAsset, 
-			const std::shared_ptr<MeshAsset>& meshAsset) 
-		{
-			return s_Instance->mGetPipeline(materialAsset, meshAsset);
-		}
+			const std::shared_ptr<MaterialAsset>& materialAsset,
+			const std::shared_ptr<MeshAsset>& meshAsset);
 
 		static PipelineData CreatePipeline(
 			const std::shared_ptr<MaterialAsset>& materialAsset,
-			const std::shared_ptr<MeshAsset>& meshAsset)
-		{
-			return s_Instance->mCreatePipeline(materialAsset, meshAsset);
-		}
+			const std::shared_ptr<MeshAsset>& meshAsset);
 
 		static void BindPipeline(
 			const std::shared_ptr<MaterialAsset>& materialAsset,
-			const std::shared_ptr<MeshAsset>& meshAsset)
-		{
-			s_Instance->mBindPipeline(materialAsset, meshAsset);
-		}
+			const std::shared_ptr<MeshAsset>& meshAsset);
 
 	private:
 		

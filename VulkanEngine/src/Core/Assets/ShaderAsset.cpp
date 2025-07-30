@@ -1,6 +1,6 @@
 #include "ShaderAsset.h"
 
-#ifdef RENDERER_VULKAN
+#if defined(RENDERER_VULKAN) || defined(REQUIRED_VR_VULKAN) 
 #include "Vulkan/Assets/VulkanShaderAsset.h"
 #endif // RENDERER_VULKAN
 

@@ -12,7 +12,6 @@ namespace CHIKU
 	uint32_t VulkanRenderer::m_CurrentFrame;
 	QueueFamilyIndices VulkanRenderer::m_QueueFamilyIndices;
 
-
 	VulkanRenderer::VulkanRenderer()
 	{
 		ZoneScoped;
@@ -30,11 +29,11 @@ namespace CHIKU
 		m_PresentQueue = VK_NULL_HANDLE;
 	}
 
-	void VulkanRenderer::mInit(GLFWwindow* window)
+	void VulkanRenderer::mInit(RendererData* data)
 	{
 		ZoneScoped;
+		m_Window = data->window;
 
-		m_Window = window;
 		if (m_Window == nullptr)
 		{
 			LOG_ERROR("GLFWwindow is required for Vulkan Engine");

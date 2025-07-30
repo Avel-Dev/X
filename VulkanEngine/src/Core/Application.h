@@ -1,6 +1,6 @@
 #pragma once
 #include "Renderer/Renderer.h"
-#include "Renderer/Window.h"
+#include "Window.h"
 #include "Assets/ModelAsset.h"
 #include "Core/Events/EventBus.h"
 

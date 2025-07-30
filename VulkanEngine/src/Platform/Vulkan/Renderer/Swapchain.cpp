@@ -99,7 +99,6 @@ namespace CHIKU
         return vkAcquireNextImageKHR(m_LogicalDevice, m_SwapChain, UINT64_MAX, semaphore, VK_NULL_HANDLE, pImageIndex);
     }
 
-    bool u = false;
     void Swapchain::BeginRenderPass(const VkCommandBuffer& commandBuffer,uint32_t imageIndex)
     {
         ZoneScoped;

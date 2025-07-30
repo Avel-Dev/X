@@ -1,14 +1,12 @@
 #pragma once
 #include "Asset.h"
 #include "ShaderAsset.h"
-#ifdef  RENDERER_VULKAN
-#include "Vulkan/Buffer/VulkanUniformBuffer.h"
-#endif //  RENDERER_VULKAN
-
 #include <glm/glm.hpp>
+#include "Vulkan/Buffer/VulkanUniformBuffer.h"
 
 namespace CHIKU
 {
+
 	struct Config
 	{
 		bool depthTest;

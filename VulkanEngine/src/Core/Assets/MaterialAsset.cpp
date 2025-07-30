@@ -3,7 +3,7 @@
 #include <nlohmann/json.hpp>
 #include <fstream>
 
-#ifdef RENDERER_VULKAN
+#if defined(RENDERER_VULKAN) || defined(REQUIRED_VR_VULKAN)
 #include "Vulkan/Assets/VulkanMaterialAsset.h"
 #endif // RENDERER_VULKAN
 

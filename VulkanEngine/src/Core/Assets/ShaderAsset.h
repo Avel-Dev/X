@@ -3,10 +3,7 @@
 #include "Renderer/Renderer.h"
 #include "Renderer/Buffer/UniformBuffer.h"
 #include "Renderer/Buffer/VertexBuffer.h"
-#ifdef RENDERER_VULKAN
 #include "Vulkan/Assets/VulkanShaderStagesData.h"
-#endif // RENDERER_VULKAN
-
 
 #define SHADER_STAGE_VERTEX "Vertex"
 #define SHADER_STAGE_TESSELATION "Tesselation"

@@ -1,15 +1,32 @@
 #pragma once
 #include "Window.h"
 
+#define VULKAN_RENDERER "VulkanRenderer"
+#define OPENXR_RENDERER "OpenXRVulkanRenderer"
+
 namespace CHIKU
 {
+	struct RendererData
+	{
+		const char* type;
+		GLFWwindow* window;
+		std::vector<const char*> extensions;
+	};
+
 	class Renderer
 	{
 	public:
 		Renderer() = default;
+
 		virtual ~Renderer() = default;
 
-		static void Init(GLFWwindow* window) { s_Instance->mInit(window); }
+		static void Init(RendererData* data) 
+		{ 
+			s_Instance = Renderer::Create(data);
+			s_Instance->mInit(data);
+		}
+
+		static Renderer* Create(const RendererData* data);
 		static void CleanUp() { s_Instance->mCleanUp(); }
 		static void Wait() { s_Instance->mWait(); }
 
@@ -28,12 +45,10 @@ namespace CHIKU
 		static void* BeginSingleTimeCommands() { return s_Instance->mBeginSingleTimeCommands(); }
 		static void EndSingleTimeCommands(void* cmdBuffer) { return s_Instance->mEndSingleTimeCommands(cmdBuffer); }
 
-		static std::unique_ptr<Renderer> Create();
-
 	protected:
 		void InsertExtension(const char** extensions, uint32_t count);
 
-		virtual void mInit(GLFWwindow* window) = 0;
+		virtual void mInit(RendererData* data) = 0;
 		virtual void mCleanUp() = 0;
 		virtual void mWait() = 0;
 
@@ -52,8 +67,7 @@ namespace CHIKU
 		virtual void mEndSingleTimeCommands(void* cmdBuffer) = 0;
 
 	protected:
-		static std::unique_ptr<Renderer> s_Instance;
-		GLFWwindow* m_Window = nullptr;
+		static Renderer* s_Instance;
 
 		std::vector<const char*> m_Extension;
 	};

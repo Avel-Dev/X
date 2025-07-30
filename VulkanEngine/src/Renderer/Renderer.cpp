@@ -1,16 +1,14 @@
 #include "Renderer.h"
-#ifdef RENDERER_VULKAN
-#include "Vulkan/Renderer/VulkanRenderer.h"
-#endif
+
+#include <Vulkan/Renderer/VulkanRenderer.h>
 
 namespace CHIKU
 {
-	std::unique_ptr<Renderer> Renderer::s_Instance = Renderer::Create();
+	Renderer* Renderer::s_Instance = nullptr;
 
-	std::unique_ptr<Renderer> Renderer::Create()
+	Renderer* Renderer::Create(const RendererData* data)
 	{
-		ZoneScoped;
-		return std::make_unique<VulkanRenderer>();
+		return new VulkanRenderer();
 	}
 
 	void Renderer::InsertExtension(const char** extensions, uint32_t count)

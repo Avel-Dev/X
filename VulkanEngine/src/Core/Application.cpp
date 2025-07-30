@@ -23,7 +23,11 @@ namespace CHIKU
 		Logger::Init("VulkanEngine");
 #endif // CHIKU_ENABLE_LOGGING
 
-		Renderer::Init(m_Window.GetWindow());
+		RendererData rendererData;
+		rendererData.type = VULKAN_RENDERER; // or OPENXR_RENDERER for OpenXR
+		rendererData.window = m_Window.GetWindow();
+
+		Renderer::Init(&rendererData);
 		AssetManager::Init();
 		GraphicsPipeline::Init();
 

@@ -1,3 +1,4 @@
+#pragma once
 #include "EngineHeader.h"
 #include "Renderer/Renderer.h"
 #include "Vulkan/Renderer/Swapchain.h"
@@ -22,10 +23,9 @@ namespace CHIKU
 	public:
 		VulkanRenderer();
 
-		void mInit(GLFWwindow* window) override;
+		void mInit(RendererData* data) override;
 		void mCleanUp() override;
 		void mWait() override;
-
  
 		static uint32_t GetGraphicsQueueFamilyIndex() { return m_QueueFamilyIndices.GraphicsFamily.value(); }
 		static uint32_t GetPresentQueueFamilyIndex() { return m_QueueFamilyIndices.PresentFamily.value(); }
@@ -87,6 +87,7 @@ namespace CHIKU
 		static uint32_t m_CurrentFrame;
 		static QueueFamilyIndices m_QueueFamilyIndices;
 
+		GLFWwindow* m_Window = nullptr;
 
 		std::vector<VkSemaphore> m_ImageAvailableSemaphore;
 		std::vector<VkSemaphore> m_RenderFinishedSemaphore;

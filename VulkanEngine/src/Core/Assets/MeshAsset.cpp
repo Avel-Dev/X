@@ -1,6 +1,6 @@
 #include "MeshAsset.h"
 #include "Renderer/Renderer.h"
-#ifdef RENDERER_VULKAN
+#if defined(RENDERER_VULKAN) || defined(REQUIRED_VR_VULKAN)
 #include "Vulkan/Assets/VulkanMeshAsset.h"
 #endif // RENDERER_VULKAN
 

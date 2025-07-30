@@ -12,36 +12,6 @@ namespace OpenXR
 		CreateDebugMessenger();
 		LoadPFN_XrFunctions(m_xrInstance);
 
-		uint32_t physicalDeviceCount = 0;
-		std::vector<VkPhysicalDevice> physicalDevices;
-		vkEnumeratePhysicalDevices(CHIKU::VulkanRenderer::GetVulkanInstance(), &physicalDeviceCount, nullptr);
-		physicalDevices.resize(physicalDeviceCount);
-		vkEnumeratePhysicalDevices(CHIKU::VulkanRenderer::GetVulkanInstance(), &physicalDeviceCount, physicalDevices.data());
-
-		VkPhysicalDevice physicalDeviceFromXR;
-		xrGetVulkanGraphicsDeviceKHR(m_xrInstance, m_SystemID, CHIKU::VulkanRenderer::GetVulkanInstance(), &physicalDeviceFromXR);
-
-		VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
-
-		auto physicalDeviceFromXR_it = std::find(physicalDevices.begin(), physicalDevices.end(), physicalDeviceFromXR);
-		if (physicalDeviceFromXR_it != physicalDevices.end()) {
-			physicalDevice = *physicalDeviceFromXR_it;
-		}
-		else {
-			std::cout << "ERROR: Vulkan: Failed to find PhysicalDevice for OpenXR." << std::endl;
-			// Select the first available device.
-			physicalDevice = physicalDevices[0];
-		}
-
-		// Device
-		std::vector<VkQueueFamilyProperties> queueFamilyProperties;
-		uint32_t queueFamilyPropertiesCount = 0;
-		vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyPropertiesCount, nullptr);
-		queueFamilyProperties.resize(queueFamilyPropertiesCount);
-		vkGetPhysicalDeviceQueueFamilyProperties(physicalDevice, &queueFamilyPropertiesCount, queueFamilyProperties.data());
-
-
-
 		XrGraphicsRequirementsVulkanKHR graphicsRequirements{ XR_TYPE_GRAPHICS_REQUIREMENTS_VULKAN_KHR };
 		xrGetVulkanGraphicsRequirementsKHR(m_xrInstance, m_SystemID, &graphicsRequirements);
 

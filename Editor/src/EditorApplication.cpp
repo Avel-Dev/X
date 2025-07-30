@@ -8,6 +8,8 @@ namespace Editor
 {
 	void EditorApplication::Init()
 	{
+		Application::Init();
+
 		m_Window.SetTitle("Editor");
 		m_Window.SetSize(1680, 945);
 	}

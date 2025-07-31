@@ -7,6 +7,17 @@
 #include <iostream>
 #include <cstring>
 
+
+#define VULKAN_CHECK(x, y)                                                                         \
+    {                                                                                              \
+        VkResult result = (x);                                                                     \
+        if (result != VK_SUCCESS) {                                                                \
+            std::cout << "ERROR: VULKAN: " << std::hex << "0x" << result << std::dec << std::endl; \
+            std::cout << "ERROR: VULKAN: " << y << std::endl;                                      \
+        }                                                                                          \
+    }
+
+
 namespace CHIKU
 {
 	uint32_t VulkanRenderer::m_CurrentFrame;
@@ -30,6 +41,23 @@ namespace CHIKU
 
 	}
 
+	// XR_DOCS_TAG_BEGIN_GraphicsAPI_Vulkan_GetDeviceExtensionsForOpenXR
+	std::vector<std::string> VulkanRenderer::GetDeviceExtensionsForOpenXR(XrInstance m_xrInstance, XrSystemId systemId) {
+		uint32_t extensionNamesSize = 0;
+		OPENXR_CHECK(xrGetVulkanDeviceExtensionsKHR(m_xrInstance, systemId, 0, &extensionNamesSize, nullptr), "Failed to get Vulkan Device Extensions.");
+
+		std::vector<char> extensionNames(extensionNamesSize);
+		OPENXR_CHECK(xrGetVulkanDeviceExtensionsKHR(m_xrInstance, systemId, extensionNamesSize, &extensionNamesSize, extensionNames.data()), "Failed to get Vulkan Device Extensions.");
+
+		std::stringstream streamData(extensionNames.data());
+		std::vector<std::string> extensions;
+		std::string extension;
+		while (std::getline(streamData, extension, ' ')) {
+			extensions.push_back(extension);
+		}
+		return extensions;
+	}
+
 	void VulkanRenderer::mInit(RendererData* data)
 	{
 		ZoneScoped;
@@ -37,26 +65,179 @@ namespace CHIKU
 
 		if (m_Window == nullptr)
 		{
-			LOG_ERROR("GLFWwindow is required for Vulkan Engine");
+			//LOG_ERROR("GLFWwindow is required for Vulkan Engine");
 		}
 
-		GetRequiredExtensions();
-		CreateInstance();
-		CreateSurface();
-		CreatePhysicalDevice();
-		CreateLogicalDevice();
-		CreateSyncObjects();
-		DescriptorPool::Init();
+		auto m_xrInstance = OpenXR::GetInstance();
+		auto systemId = OpenXR::GetSystemID();
 
-		m_Commands.Init(m_GraphicsQueue, m_LogicalDevice, m_PhysicalDevice, m_Surface);
-		m_Swapchain.Init(m_Window, m_PhysicalDevice, m_LogicalDevice, m_Surface);
+		LoadPFN_XrFunctions();
 
-		m_GraphicsBinding = { XR_TYPE_GRAPHICS_BINDING_VULKAN_KHR };
-		m_GraphicsBinding.instance = m_Instance;
-		m_GraphicsBinding.physicalDevice = m_PhysicalDevice;
-		m_GraphicsBinding.device = m_LogicalDevice;
-		m_GraphicsBinding.queueFamilyIndex = m_QueueFamilyIndices.GraphicsFamily.value();
-		m_GraphicsBinding.queueIndex = 0;
+		XrGraphicsRequirementsVulkanKHR graphicsRequirements{ XR_TYPE_GRAPHICS_REQUIREMENTS_VULKAN_KHR };
+		OPENXR_CHECK(xrGetVulkanGraphicsRequirementsKHR(m_xrInstance, systemId, &graphicsRequirements), "Failed to get Graphics Requirements for Vulkan.");
+
+		VkApplicationInfo ai;
+		ai.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
+		ai.pNext = nullptr;
+		ai.pApplicationName = "OpenXR Tutorial - Vulkan";
+		ai.applicationVersion = 1;
+		ai.pEngineName = "OpenXR Tutorial - Vulkan Engine";
+		ai.engineVersion = 1;
+		ai.apiVersion = VK_MAKE_API_VERSION(0, XR_VERSION_MAJOR(graphicsRequirements.minApiVersionSupported), XR_VERSION_MINOR(graphicsRequirements.minApiVersionSupported), 0);
+
+		uint32_t instanceExtensionCount = 0;
+		VULKAN_CHECK(vkEnumerateInstanceExtensionProperties(nullptr, &instanceExtensionCount, nullptr), "Failed to enumerate InstanceExtensionProperties.");
+
+		std::vector<VkExtensionProperties> instanceExtensionProperties;
+		instanceExtensionProperties.resize(instanceExtensionCount);
+		VULKAN_CHECK(vkEnumerateInstanceExtensionProperties(nullptr, &instanceExtensionCount, instanceExtensionProperties.data()), "Failed to enumerate InstanceExtensionProperties.");
+		const std::vector<std::string>& openXrInstanceExtensionNames = GetInstanceExtensionsForOpenXR(m_xrInstance, systemId);
+
+		for (const std::string& requestExtension : openXrInstanceExtensionNames) {
+			for (const VkExtensionProperties& extensionProperty : instanceExtensionProperties) {
+				if (strcmp(requestExtension.c_str(), extensionProperty.extensionName))
+					continue;
+				else
+					activeInstanceExtensions.push_back(requestExtension.c_str());
+				break;
+			}
+		}
+
+		VkInstanceCreateInfo instanceCI;
+		instanceCI.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
+		instanceCI.pNext = nullptr;
+		instanceCI.flags = 0;
+		instanceCI.pApplicationInfo = &ai;
+		instanceCI.enabledLayerCount = static_cast<uint32_t>(activeInstanceLayers.size());
+		instanceCI.ppEnabledLayerNames = activeInstanceLayers.data();
+		instanceCI.enabledExtensionCount = static_cast<uint32_t>(activeInstanceExtensions.size());
+		instanceCI.ppEnabledExtensionNames = activeInstanceExtensions.data();
+		VULKAN_CHECK(vkCreateInstance(&instanceCI, nullptr, &m_Instance), "Failed to create Vulkan Instance.");
+
+		// Physical Device
+		uint32_t physicalDeviceCount = 0;
+		std::vector<VkPhysicalDevice> physicalDevices;
+		VULKAN_CHECK(vkEnumeratePhysicalDevices(m_Instance, &physicalDeviceCount, nullptr), "Failed to enumerate PhysicalDevices.");
+		physicalDevices.resize(physicalDeviceCount);
+		VULKAN_CHECK(vkEnumeratePhysicalDevices(m_Instance, &physicalDeviceCount, physicalDevices.data()), "Failed to enumerate PhysicalDevices.");
+
+		VkPhysicalDevice physicalDeviceFromXR;
+		OPENXR_CHECK(xrGetVulkanGraphicsDeviceKHR(m_xrInstance, systemId, m_Instance, &physicalDeviceFromXR), "Failed to get Graphics Device for Vulkan.");
+		auto physicalDeviceFromXR_it = std::find(physicalDevices.begin(), physicalDevices.end(), physicalDeviceFromXR);
+		if (physicalDeviceFromXR_it != physicalDevices.end()) {
+			m_PhysicalDevice = *physicalDeviceFromXR_it;
+		}
+		else {
+			std::cout << "ERROR: Vulkan: Failed to find PhysicalDevice for OpenXR." << std::endl;
+			// Select the first available device.
+			m_PhysicalDevice = physicalDevices[0];
+		}
+
+		// Device
+		std::vector<VkQueueFamilyProperties> queueFamilyProperties;
+		uint32_t queueFamilyPropertiesCount = 0;
+		vkGetPhysicalDeviceQueueFamilyProperties(m_PhysicalDevice, &queueFamilyPropertiesCount, nullptr);
+		queueFamilyProperties.resize(queueFamilyPropertiesCount);
+		vkGetPhysicalDeviceQueueFamilyProperties(m_PhysicalDevice, &queueFamilyPropertiesCount, queueFamilyProperties.data());
+
+		std::vector<VkDeviceQueueCreateInfo> deviceQueueCIs;
+		std::vector<std::vector<float>> queuePriorities;
+		queuePriorities.resize(queueFamilyProperties.size());
+		deviceQueueCIs.resize(queueFamilyProperties.size());
+		for (size_t i = 0; i < deviceQueueCIs.size(); i++) {
+			for (size_t j = 0; j < queueFamilyProperties[i].queueCount; j++)
+				queuePriorities[i].push_back(1.0f);
+
+			deviceQueueCIs[i].sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+			deviceQueueCIs[i].pNext = nullptr;
+			deviceQueueCIs[i].flags = 0;
+			deviceQueueCIs[i].queueFamilyIndex = static_cast<uint32_t>(i);
+			deviceQueueCIs[i].queueCount = queueFamilyProperties[i].queueCount;
+			deviceQueueCIs[i].pQueuePriorities = queuePriorities[i].data();
+
+			if (Utils::BitwiseCheck(queueFamilyProperties[i].queueFlags, VkQueueFlags(VK_QUEUE_GRAPHICS_BIT)) && queueFamilyIndex == 0xFFFFFFFF && queueIndex == 0xFFFFFFFF) {
+				queueFamilyIndex = static_cast<uint32_t>(i);
+				queueIndex = 0;
+			}
+		}
+
+		uint32_t deviceExtensionCount = 0;
+		VULKAN_CHECK(vkEnumerateDeviceExtensionProperties(m_PhysicalDevice, 0, &deviceExtensionCount, 0), "Failed to enumerate DeviceExtensionProperties.");
+		std::vector<VkExtensionProperties> deviceExtensionProperties;
+		deviceExtensionProperties.resize(deviceExtensionCount);
+
+		VULKAN_CHECK(vkEnumerateDeviceExtensionProperties(m_PhysicalDevice, 0, &deviceExtensionCount, deviceExtensionProperties.data()), "Failed to enumerate DeviceExtensionProperties.");
+		const std::vector<std::string>& openXrDeviceExtensionNames = GetDeviceExtensionsForOpenXR(m_xrInstance, systemId);
+		for (const std::string& requestExtension : openXrDeviceExtensionNames) {
+			for (const VkExtensionProperties& extensionProperty : deviceExtensionProperties) {
+				if (strcmp(requestExtension.c_str(), extensionProperty.extensionName))
+					continue;
+				else
+					activeDeviceExtensions.push_back(requestExtension.c_str());
+				break;
+			}
+		}
+
+		VkPhysicalDeviceProperties deviceProperties;
+
+		vkGetPhysicalDeviceProperties(m_PhysicalDevice, &deviceProperties);
+		std::cout << "Device Name: " << deviceProperties.deviceName << std::endl;
+
+		VkPhysicalDeviceFeatures features;
+		vkGetPhysicalDeviceFeatures(m_PhysicalDevice, &features);
+
+		VkDeviceCreateInfo deviceCI;
+		deviceCI.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+		deviceCI.pNext = nullptr;
+		deviceCI.flags = 0;
+		deviceCI.queueCreateInfoCount = static_cast<uint32_t>(deviceQueueCIs.size());
+		deviceCI.pQueueCreateInfos = deviceQueueCIs.data();
+		deviceCI.enabledLayerCount = 0;
+		deviceCI.ppEnabledLayerNames = nullptr;
+		deviceCI.enabledExtensionCount = static_cast<uint32_t>(activeDeviceExtensions.size());
+		deviceCI.ppEnabledExtensionNames = activeDeviceExtensions.data();
+		deviceCI.pEnabledFeatures = &features;
+		VULKAN_CHECK(vkCreateDevice(m_PhysicalDevice, &deviceCI, nullptr, &m_LogicalDevice), "Failed to create Device.");
+
+		VkCommandPoolCreateInfo cmdPoolCI;
+		cmdPoolCI.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
+		cmdPoolCI.pNext = nullptr;
+		cmdPoolCI.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
+		cmdPoolCI.queueFamilyIndex = queueFamilyIndex;
+		VULKAN_CHECK(vkCreateCommandPool(m_LogicalDevice, &cmdPoolCI, nullptr, &cmdPool), "Failed to create CommandPool.");
+
+		VkCommandBufferAllocateInfo allocateInfo;
+		allocateInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+		allocateInfo.pNext = nullptr;
+		allocateInfo.commandPool = cmdPool;
+		allocateInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+		allocateInfo.commandBufferCount = 1;
+		VULKAN_CHECK(vkAllocateCommandBuffers(m_LogicalDevice, &allocateInfo, &cmdBuffer), "Failed to allocate CommandBuffers.");
+
+		vkGetDeviceQueue(m_LogicalDevice, queueFamilyIndex, queueIndex, &queue);
+
+		VkFenceCreateInfo fenceCI{ VK_STRUCTURE_TYPE_FENCE_CREATE_INFO };
+		fenceCI.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
+		fenceCI.pNext = nullptr;
+		fenceCI.flags = VK_FENCE_CREATE_SIGNALED_BIT;
+		VULKAN_CHECK(vkCreateFence(m_LogicalDevice, &fenceCI, nullptr, &fence), "Failed to create Fence.")
+
+			uint32_t maxSets = 1024;
+		std::vector<VkDescriptorPoolSize> poolSizes{
+			{VK_DESCRIPTOR_TYPE_SAMPLER, 16 * maxSets},
+			{VK_DESCRIPTOR_TYPE_SAMPLED_IMAGE, 16 * maxSets},
+			{VK_DESCRIPTOR_TYPE_STORAGE_IMAGE, 16 * maxSets},
+			{VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, 16 * maxSets},
+			{VK_DESCRIPTOR_TYPE_STORAGE_BUFFER, 16 * maxSets} };
+
+		VkDescriptorPoolCreateInfo descPoolCI;
+		descPoolCI.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+		descPoolCI.pNext = nullptr;
+		descPoolCI.flags = VK_DESCRIPTOR_POOL_CREATE_FREE_DESCRIPTOR_SET_BIT;
+		descPoolCI.maxSets = maxSets;
+		descPoolCI.poolSizeCount = static_cast<uint32_t>(poolSizes.size());
+		descPoolCI.pPoolSizes = poolSizes.data();
+		VULKAN_CHECK(vkCreateDescriptorPool(m_LogicalDevice, &descPoolCI, nullptr, &descriptorPool), "Failed to create DescriptorPool");
 
 	}
 
@@ -93,6 +274,11 @@ namespace CHIKU
 
 		vkQueueWaitIdle(m_GraphicsQueue);
 		vkQueueWaitIdle(m_PresentQueue);
+	}
+
+	void* VulkanRenderer::mGetGraphicsBinding()
+	{
+		return &m_GraphicsBinding;
 	}
 
 	void VulkanRenderer::mRecreateSwapChain()
@@ -289,9 +475,9 @@ namespace CHIKU
 		appInfo.applicationVersion = VK_MAKE_VERSION(1, 0, 0);
 		appInfo.pEngineName = "CHIKU";
 		appInfo.engineVersion = VK_MAKE_VERSION(1, 0, 0);
-		appInfo.apiVersion = OpenXR::GetAPIVersion();
+		appInfo.apiVersion = 0;
 
-		auto OpenXRExtensions = OpenXR::GetVulkanRequiredExtensions();
+		std::vector<std::string> OpenXRExtensions;
 
 		std::vector<const char*> cstrVec;
 
@@ -349,52 +535,25 @@ namespace CHIKU
 
 		uint32_t deviceCount = 0;
 		vkEnumeratePhysicalDevices(m_Instance, &deviceCount, nullptr);
-
-		if (deviceCount == 0)
-		{
-			LOG_ERROR("failed to find GPUs with Vulkan support!");
-		}
-
+		if (deviceCount == 0) { LOG_ERROR("failed to find GPUs with Vulkan support!"); }
 		std::vector<VkPhysicalDevice> devices(deviceCount);
 		vkEnumeratePhysicalDevices(m_Instance, &deviceCount, devices.data());
-		// Selection logic can be added here
 
-		for (const auto& device : devices)
-		{
-			if (Utils::IsDeviceSuitable(device, m_Surface, m_DeviceExtensions))
-			{
-				m_PhysicalDevice = device;
-				break;
-			}
+		auto physicalDeviceFromXR_it = std::find(devices.begin(), devices.end(), m_PhysicalDevice);
+		if (physicalDeviceFromXR_it != devices.end()) {
+			m_PhysicalDevice = *physicalDeviceFromXR_it;
+		}
+		else {
+			std::cout << "ERROR: Vulkan: Failed to find PhysicalDevice for OpenXR." << std::endl;
+			// Select the first available device.
+			m_PhysicalDevice = devices[0];
 		}
 
-		if (m_PhysicalDevice == VK_NULL_HANDLE)
-		{
-			LOG_ERROR("failed to find a suitable GPU!");
-		}
+		VkPhysicalDeviceProperties deviceProperties;
 
-		// Use an ordered map to automatically sort candidates by increasing score
-		std::multimap<int, VkPhysicalDevice> candidates;
+		vkGetPhysicalDeviceProperties(m_PhysicalDevice, &deviceProperties);
+		std::cout << "Device Name: " << deviceProperties.deviceName << std::endl;
 
-		for (const auto& device : devices)
-		{
-			int score = Utils::RateDeviceSuitability(device);
-			candidates.insert(std::make_pair(score, device));
-		}
-
-		// Check if the best candidate is suitable at all
-		if (candidates.rbegin()->first > 0)
-		{
-			m_PhysicalDevice = candidates.rbegin()->second;
-			VkPhysicalDeviceProperties deviceProperties;
-
-			vkGetPhysicalDeviceProperties(m_PhysicalDevice, &deviceProperties);
-			std::cout << "Device Name: " << deviceProperties.deviceName << std::endl;
-		}
-		else
-		{
-			LOG_ERROR("failed to find a suitable GPU!");
-		}
 	}
 
 	VkResult VulkanRenderer::CreateDebugUtilsMessengerEXT(VkInstance instance,
@@ -515,5 +674,15 @@ namespace CHIKU
 				LOG_ERROR("failed to create semaphores!");
 			}
 		}
+	}
+
+	void VulkanRenderer::CreateGraphicsBinding()
+	{
+		m_GraphicsBinding = { XR_TYPE_GRAPHICS_BINDING_VULKAN_KHR };
+		m_GraphicsBinding.instance = m_Instance;
+		m_GraphicsBinding.physicalDevice = m_PhysicalDevice;
+		m_GraphicsBinding.device = m_LogicalDevice;
+		m_GraphicsBinding.queueFamilyIndex = queueFamilyIndex;
+		m_GraphicsBinding.queueIndex = queueIndex;
 	}
 }

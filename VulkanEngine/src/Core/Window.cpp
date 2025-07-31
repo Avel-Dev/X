@@ -12,18 +12,18 @@ namespace CHIKU
 	void Window::Init()
 	{
 		ZoneScoped;
-		InitWindow();
+		//InitWindow();
 	}
 
 	void Window::Create()
 	{
 		ZoneScoped;
-		glfwInit();
+		/*glfwInit();
 		glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
 		glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
 		m_Window = glfwCreateWindow(WIDTH, HEIGHT, m_Title, nullptr, nullptr);
 
-		InitWindow();
+		InitWindow();*/
 	}
 
 	void Window::InitWindow()

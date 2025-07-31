@@ -41,7 +41,34 @@ namespace CHIKU
 		static const inline void EndRecordingSingleTimeCommands(VkCommandBuffer commandBuffer) noexcept { return s_Instance->EndSingleTimeCommands(commandBuffer); }
 
 	private:
-		virtual void* mGetGraphicsBinding() override { return &m_GraphicsBinding; }
+
+		void LoadPFN_XrFunctions()
+		{
+			auto m_xrInstance = OpenXR::GetInstance();
+			OPENXR_CHECK(xrGetInstanceProcAddr(m_xrInstance, "xrGetVulkanGraphicsRequirementsKHR", (PFN_xrVoidFunction*)&xrGetVulkanGraphicsRequirementsKHR), "Failed to get InstanceProcAddr for xrGetVulkanGraphicsRequirementsKHR.");
+			OPENXR_CHECK(xrGetInstanceProcAddr(m_xrInstance, "xrGetVulkanInstanceExtensionsKHR", (PFN_xrVoidFunction*)&xrGetVulkanInstanceExtensionsKHR), "Failed to get InstanceProcAddr for xrGetVulkanInstanceExtensionsKHR.");
+			OPENXR_CHECK(xrGetInstanceProcAddr(m_xrInstance, "xrGetVulkanDeviceExtensionsKHR", (PFN_xrVoidFunction*)&xrGetVulkanDeviceExtensionsKHR), "Failed to get InstanceProcAddr for xrGetVulkanDeviceExtensionsKHR.");
+			OPENXR_CHECK(xrGetInstanceProcAddr(m_xrInstance, "xrGetVulkanGraphicsDeviceKHR", (PFN_xrVoidFunction*)&xrGetVulkanGraphicsDeviceKHR), "Failed to get InstanceProcAddr for xrGetVulkanGraphicsDeviceKHR.");
+		}
+
+		std::vector<std::string> GetInstanceExtensionsForOpenXR(XrInstance m_xrInstance, XrSystemId systemId)
+		{
+			uint32_t extensionNamesSize = 0;
+			OPENXR_CHECK(xrGetVulkanInstanceExtensionsKHR(m_xrInstance, systemId, 0, &extensionNamesSize, nullptr), "Failed to get Vulkan Instance Extensions.");
+
+			std::vector<char> extensionNames(extensionNamesSize);
+			OPENXR_CHECK(xrGetVulkanInstanceExtensionsKHR(m_xrInstance, systemId, extensionNamesSize, &extensionNamesSize, extensionNames.data()), "Failed to get Vulkan Instance Extensions.");
+
+			std::stringstream streamData(extensionNames.data());
+			std::vector<std::string> extensions;
+			std::string extension;
+			while (std::getline(streamData, extension, ' ')) {
+				extensions.push_back(extension);
+			}
+			return extensions;
+		}
+
+		virtual void* mGetGraphicsBinding() override;
 		virtual void* mGetInstance() override { return m_Instance; }
 		virtual void* mGetRenderPass() override { return m_Swapchain.GetRenderPass(); }
 		virtual void* mGetCommandBuffer() override { return m_Commands.GetCommandBuffer(m_CurrentFrame); }
@@ -66,8 +93,11 @@ namespace CHIKU
 			const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
 			void* pUserData);
 
+		std::vector<std::string> GetDeviceExtensionsForOpenXR(XrInstance m_xrInstance, XrSystemId systemId);
+
 		void PopulateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
 		bool CheckValidationLayerSupport();
+
 		void CreateInstance();
 		void CreateSurface();
 		void CreatePhysicalDevice();
@@ -85,9 +115,25 @@ namespace CHIKU
 		void CreateLogicalDevice();
 		void CreateSyncObjects();
 
+		void CreateGraphicsBinding();
+
 	private:
 		static uint32_t m_CurrentFrame;
 		static QueueFamilyIndices m_QueueFamilyIndices;
+
+		std::vector<const char*> activeInstanceLayers{};
+		std::vector<const char*> activeInstanceExtensions{};
+		std::vector<const char*> activeDeviceLayer{};
+		std::vector<const char*> activeDeviceExtensions{};
+
+		uint32_t queueFamilyIndex = 0xFFFFFFFF;
+		uint32_t queueIndex = 0xFFFFFFFF;
+		VkQueue queue{};
+		VkFence fence{};
+
+		VkCommandPool cmdPool{};
+		VkCommandBuffer cmdBuffer{};
+		VkDescriptorPool descriptorPool;
 
 		GLFWwindow* m_Window = nullptr;
 

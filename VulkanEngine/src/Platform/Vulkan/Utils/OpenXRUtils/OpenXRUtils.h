@@ -26,7 +26,7 @@ namespace CHIKU::Utils
     // XR_DOCS_TAG_BEGIN_Helper_Functions0
     inline void OpenXRDebugBreak() {
         std::cerr << "Breakpoint here to debug." << std::endl;
-        DEBUG_BREAK;
+        __debugbreak();
     }
 
     inline const char* GetXRErrorString(XrInstance xrInstance, XrResult result) {
@@ -34,15 +34,6 @@ namespace CHIKU::Utils
         xrResultToString(xrInstance, result, string);
         return string;
     }
-
-
-    XrBool32 OpenXRMessageCallbackFunction(XrDebugUtilsMessageSeverityFlagsEXT messageSeverity, 
-        XrDebugUtilsMessageTypeFlagsEXT messageType, 
-        const XrDebugUtilsMessengerCallbackDataEXT* pCallbackData, 
-        void* pUserData);
-
-    XrDebugUtilsMessengerEXT CreateOpenXRDebugUtilsMessenger(XrInstance m_xrInstance);
-    void DestroyOpenXRDebugUtilsMessenger(XrInstance m_xrInstance, XrDebugUtilsMessengerEXT debugUtilsMessenger);
 }
 
 #define OPENXR_CHECK(x, y)                                                                                                                                  \

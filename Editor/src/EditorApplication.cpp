@@ -19,6 +19,6 @@ namespace CHIKU
 {
 	Application* CreateApplication()
 	{
-		return new Editor::EditorApplication();
+		return new Application();
 	}
 }

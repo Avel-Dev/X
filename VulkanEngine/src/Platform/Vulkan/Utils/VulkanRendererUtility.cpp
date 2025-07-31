@@ -40,14 +40,14 @@ namespace CHIKU
 			{
 				if (queueFamily.queueFlags & VK_QUEUE_GRAPHICS_BIT)
 				{
-					indices.GraphicsFamily = i;
+					indices.QueueFamilyIndicesArray[GRAPHICS_FAMILY] = i;
 				}
 
 				VkBool32 presentSupport = false;
 				vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
 				if (presentSupport)
 				{
-					indices.PresentFamily = i;
+					indices.QueueFamilyIndicesArray[PRESENT_FAMILY] = i;
 				}
 
 				i++;

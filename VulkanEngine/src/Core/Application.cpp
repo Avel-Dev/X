@@ -16,9 +16,9 @@ namespace CHIKU
 	void Application::Init()
 	{
 		ZoneScoped;    // Profile this block
-		//m_Window.SetTitle("Chiku Editor");
-		//m_Window.SetSize(1280, 720);
-		//m_Window.Create();
+		m_Window.SetTitle("Chiku Editor");
+		m_Window.SetSize(1280, 720);
+		m_Window.Create();
 
 #ifdef CHIKU_ENABLE_LOGGING
 		Logger::Init("VulkanEngine");
@@ -31,18 +31,18 @@ namespace CHIKU
 		OpenXR::Init();
 		Renderer::Init(&rendererData);
 		AssetManager::Init();
-		//GraphicsPipeline::Init();
+		GraphicsPipeline::Init();
 
 		s_Data.eventHandler = [this](Event& event) -> void
 			{
 				Publish(event);
 			};
 
-		/*AssetManager::AddShader({ "src/Shaders/Unlit/unlit.vert", "src/Shaders/Unlit/unlit.frag" });
+		AssetManager::AddShader({ "src/Shaders/Unlit/unlit.vert", "src/Shaders/Unlit/unlit.frag" });
 		AssetManager::AddShader({ "src/Shaders/Defaultlit/defaultlit.vert", "src/Shaders/Defaultlit/defaultlit.frag" });
 
 		auto assetHandle = AssetManager::AddModel({ "Models/Y Bot/Y Bot.gltf" });
-		m_Model = std::dynamic_pointer_cast<ModelAsset>(AssetManager::GetAsset(assetHandle));*/
+		m_Model = std::dynamic_pointer_cast<ModelAsset>(AssetManager::GetAsset(assetHandle));
 	}
 
 	void Application::Run()
@@ -72,7 +72,7 @@ namespace CHIKU
 				s_Data.framebufferResized = false;
 			}
 			Renderer::BeginFrame();
-			//m_Model->Draw();
+			m_Model->Draw();
 			Renderer::EndFrame();
 		}
 	}

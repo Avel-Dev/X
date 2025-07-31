@@ -18,13 +18,13 @@ namespace CHIKU
             s_Instance->mInit();
 		}
 
-		//static uint32_t GetAPIVersion() { return s_Instance->mGetAPIVersion(); }
-        static void Run() { s_Instance->mRun(); }
+		static uint32_t GetAPIVersion() { return s_Instance->mGetAPIVersion(); }
         static XrInstance GetInstance() { return s_Instance->m_xrInstance; }
-        //static std::vector<std::string> GetVulkanRequiredExtensions();
-        //static VkPhysicalDevice GetXRPhysicalDevice() { return s_Instance->mGetXRPhysicalDevice(); }
-        //static std::vector<std::string> GetDeviceExtensionsForOpenXR() { return s_Instance->mGetDeviceExtensionsForOpenXR();  }
 		static XrSystemId GetSystemID() { return s_Instance->m_systemID; }
+        static VkPhysicalDevice GetXRPhysicalDevice() { return s_Instance->mGetXRPhysicalDevice(); }
+        static std::vector<std::string> GetVulkanRequiredExtensions();
+        static std::vector<std::string> GetDeviceExtensionsForOpenXR() { return s_Instance->mGetDeviceExtensionsForOpenXR();  }
+        static void Run() { s_Instance->mRun(); }
 
         static void CleanUp() 
         { 
@@ -37,10 +37,10 @@ namespace CHIKU
         void mInit();
         void mRun();
         void mCleanUp();
-        //uint32_t mGetAPIVersion();
-        //VkPhysicalDevice mGetXRPhysicalDevice();
+        uint32_t mGetAPIVersion();
+        VkPhysicalDevice mGetXRPhysicalDevice();
 
-        //std::vector<std::string> mGetDeviceExtensionsForOpenXR();
+        std::vector<std::string> mGetDeviceExtensionsForOpenXR();
 
         void CreateInstance();
         void DestroyInstance();
@@ -52,10 +52,10 @@ namespace CHIKU
         void DestroySession();
         void PollEvents();
         void PollSystemEvents();
-        //void LoadPFN_XrFunctions();
+        void LoadPFN_XrFunctions();
 
-        //std::vector<std::string> GetInstanceExtensionsForOpenXR(XrInstance m_xrInstance, XrSystemId systemId);
-        //void GenerateVulkanRequiredExtensions();
+        std::vector<std::string> GetInstanceExtensionsForOpenXR(XrInstance m_xrInstance, XrSystemId systemId);
+        void GenerateVulkanRequiredExtensions();
 
     private:
         static OpenXR* s_Instance;
@@ -78,5 +78,10 @@ namespace CHIKU
         XrSessionState m_sessionState = XR_SESSION_STATE_UNKNOWN;
         bool m_applicationRunning = true;
         bool m_sessionRunning = false;
+
+        PFN_xrGetVulkanGraphicsRequirementsKHR xrGetVulkanGraphicsRequirementsKHR;
+        PFN_xrGetVulkanInstanceExtensionsKHR xrGetVulkanInstanceExtensionsKHR;
+        PFN_xrGetVulkanDeviceExtensionsKHR xrGetVulkanDeviceExtensionsKHR;
+        PFN_xrGetVulkanGraphicsDeviceKHR xrGetVulkanGraphicsDeviceKHR;
     };
 }

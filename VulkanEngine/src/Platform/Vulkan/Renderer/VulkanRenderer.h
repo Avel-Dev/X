@@ -8,14 +8,24 @@
 
 namespace CHIKU
 {
+	enum QueueFamilies
+	{
+		GRAPHICS_FAMILY = 0,
+		PRESENT_FAMILY = 1,
+		MAX_QUEUE_FAMILIES = 2
+	};
+
 	struct QueueFamilyIndices
 	{
-		std::optional<uint32_t> GraphicsFamily;
-		std::optional<uint32_t> PresentFamily;
+		std::array<std::optional<uint32_t>, MAX_QUEUE_FAMILIES> QueueFamilyIndicesArray;
 
 		bool isComplete()
 		{
-			return GraphicsFamily.has_value() && PresentFamily.has_value();
+			for(int i = 0 ; i < MAX_QUEUE_FAMILIES; ++i)
+			{
+				if (!QueueFamilyIndicesArray[i].has_value())
+					return false;
+			}
 		}
 	};
 
@@ -28,8 +38,8 @@ namespace CHIKU
 		void mCleanUp() override;
 		void mWait() override;
 
-		static uint32_t GetGraphicsQueueFamilyIndex() { return m_QueueFamilyIndices.GraphicsFamily.value(); }
-		static uint32_t GetPresentQueueFamilyIndex() { return m_QueueFamilyIndices.PresentFamily.value(); }
+		static uint32_t GetGraphicsQueueFamilyIndex() { return m_QueueFamilyIndices.QueueFamilyIndicesArray[GRAPHICS_FAMILY].value(); }
+		static uint32_t GetPresentQueueFamilyIndex() { return m_QueueFamilyIndices.QueueFamilyIndicesArray[PRESENT_FAMILY].value(); }
 		static VkInstance GetVulkanInstance() { return (VkInstance)s_Instance->GetInstance(); }	
 		static VkDevice GetVulkanDevice() { return (VkDevice)s_Instance->GetDevice(); }
 		static VkPhysicalDevice GetVulkanPhysicalDevice() { return (VkPhysicalDevice)s_Instance->GetPhysicalDevice(); }
@@ -41,33 +51,6 @@ namespace CHIKU
 		static const inline void EndRecordingSingleTimeCommands(VkCommandBuffer commandBuffer) noexcept { return s_Instance->EndSingleTimeCommands(commandBuffer); }
 
 	private:
-
-		void LoadPFN_XrFunctions()
-		{
-			auto m_xrInstance = OpenXR::GetInstance();
-			OPENXR_CHECK(xrGetInstanceProcAddr(m_xrInstance, "xrGetVulkanGraphicsRequirementsKHR", (PFN_xrVoidFunction*)&xrGetVulkanGraphicsRequirementsKHR), "Failed to get InstanceProcAddr for xrGetVulkanGraphicsRequirementsKHR.");
-			OPENXR_CHECK(xrGetInstanceProcAddr(m_xrInstance, "xrGetVulkanInstanceExtensionsKHR", (PFN_xrVoidFunction*)&xrGetVulkanInstanceExtensionsKHR), "Failed to get InstanceProcAddr for xrGetVulkanInstanceExtensionsKHR.");
-			OPENXR_CHECK(xrGetInstanceProcAddr(m_xrInstance, "xrGetVulkanDeviceExtensionsKHR", (PFN_xrVoidFunction*)&xrGetVulkanDeviceExtensionsKHR), "Failed to get InstanceProcAddr for xrGetVulkanDeviceExtensionsKHR.");
-			OPENXR_CHECK(xrGetInstanceProcAddr(m_xrInstance, "xrGetVulkanGraphicsDeviceKHR", (PFN_xrVoidFunction*)&xrGetVulkanGraphicsDeviceKHR), "Failed to get InstanceProcAddr for xrGetVulkanGraphicsDeviceKHR.");
-		}
-
-		std::vector<std::string> GetInstanceExtensionsForOpenXR(XrInstance m_xrInstance, XrSystemId systemId)
-		{
-			uint32_t extensionNamesSize = 0;
-			OPENXR_CHECK(xrGetVulkanInstanceExtensionsKHR(m_xrInstance, systemId, 0, &extensionNamesSize, nullptr), "Failed to get Vulkan Instance Extensions.");
-
-			std::vector<char> extensionNames(extensionNamesSize);
-			OPENXR_CHECK(xrGetVulkanInstanceExtensionsKHR(m_xrInstance, systemId, extensionNamesSize, &extensionNamesSize, extensionNames.data()), "Failed to get Vulkan Instance Extensions.");
-
-			std::stringstream streamData(extensionNames.data());
-			std::vector<std::string> extensions;
-			std::string extension;
-			while (std::getline(streamData, extension, ' ')) {
-				extensions.push_back(extension);
-			}
-			return extensions;
-		}
-
 		virtual void* mGetGraphicsBinding() override;
 		virtual void* mGetInstance() override { return m_Instance; }
 		virtual void* mGetRenderPass() override { return m_Swapchain.GetRenderPass(); }
@@ -93,14 +76,13 @@ namespace CHIKU
 			const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
 			void* pUserData);
 
-		std::vector<std::string> GetDeviceExtensionsForOpenXR(XrInstance m_xrInstance, XrSystemId systemId);
-
 		void PopulateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
 		bool CheckValidationLayerSupport();
 
 		void CreateInstance();
 		void CreateSurface();
 		void CreatePhysicalDevice();
+		void CreateDeviceQueue();
 
 		VkResult CreateDebugUtilsMessengerEXT(VkInstance instance,
 			const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo,
@@ -125,15 +107,6 @@ namespace CHIKU
 		std::vector<const char*> activeInstanceExtensions{};
 		std::vector<const char*> activeDeviceLayer{};
 		std::vector<const char*> activeDeviceExtensions{};
-
-		uint32_t queueFamilyIndex = 0xFFFFFFFF;
-		uint32_t queueIndex = 0xFFFFFFFF;
-		VkQueue queue{};
-		VkFence fence{};
-
-		VkCommandPool cmdPool{};
-		VkCommandBuffer cmdBuffer{};
-		VkDescriptorPool descriptorPool;
 
 		GLFWwindow* m_Window = nullptr;
 
@@ -165,10 +138,6 @@ namespace CHIKU
 		VkPipelineLayout m_PipelineLayout;
 		VkPipeline m_GraphicsPipeline;
 
-		PFN_xrGetVulkanGraphicsRequirementsKHR xrGetVulkanGraphicsRequirementsKHR;
-		PFN_xrGetVulkanInstanceExtensionsKHR xrGetVulkanInstanceExtensionsKHR;
-		PFN_xrGetVulkanDeviceExtensionsKHR xrGetVulkanDeviceExtensionsKHR;
-		PFN_xrGetVulkanGraphicsDeviceKHR xrGetVulkanGraphicsDeviceKHR;
 		XrGraphicsBindingVulkanKHR m_GraphicsBinding;
 	};
 }

@@ -81,10 +81,11 @@ namespace CHIKU
 	{
 		ZoneScoped;
 
+		m_Model->CleanUp();
 		Renderer::Wait();
 		OpenXR::CleanUp();
 		AssetManager::CleanUp();
-		//GraphicsPipeline::CleanUp();
+		GraphicsPipeline::CleanUp();
 		Renderer::CleanUp();
 #ifdef CHIKU_ENABLE_LOGGING
 		Logger::Shutdown();
